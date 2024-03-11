@@ -1,11 +1,5 @@
 #pragma once
-#include "float.h"
-#include "stdlib.h"
-#include "string.h"
-#include "math.h"
-
 #include "c_api.h"
-
 
 extern const char* class_names[];
 extern const int color_list[80][3];
