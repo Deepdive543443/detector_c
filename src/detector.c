@@ -384,12 +384,12 @@ void draw_boxxes(unsigned char *pixels, int pixel_w, int pixel_h, BoxVec *object
     {
         struct
         {
-            __uint8_t r;
-            __uint8_t g;
-            __uint8_t b;
-            __uint8_t a;
+            uint8_t r;
+            uint8_t g;
+            uint8_t b;
+            uint8_t a;
         };
-        __uint32_t rgba;
+        uint32_t rgba;
     } color;
     for (size_t i =0; i < objects->num_item; i++)
     {
