@@ -1,3 +1,7 @@
+#include <stdlib.h>
+#include <string.h>
+#include <float.h>
+#include <math.h>
 #include "detector.h"
 
 
