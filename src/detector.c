@@ -119,7 +119,7 @@ BoxInfo BoxVec_getItem(size_t index, void *self_ptr)
     }
     else
     {
-        printf("Index:%ld out of range\n", index);
+        printf("Index:%d out of range\n", index);
         return boxVec->data[boxVec->num_item - 1];
     }
 
@@ -165,7 +165,7 @@ BoxInfo BoxVec_remove(size_t index, void *self_ptr)
     {
         return BoxVec_pop(self_ptr);
     }
-    printf("Index:%ld out of range\n", index);
+    printf("Index:%d out of range\n", index);
     return empty;
 }
 
