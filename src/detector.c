@@ -19,7 +19,7 @@ const char *class_names[] = {
     "toaster",        "sink",       "refrigerator",  "book",          "clock",        "vase",          "scissors",
     "teddy bear",     "hair drier", "toothbrush"};
 
-const int color_list[80][3] = {
+const uint8_t color_list[80][3] = {
     //{255 ,255 ,255}, //bg
     {216, 82, 24},   {236, 176, 31},  {125, 46, 141},  {118, 171, 47},  {76, 189, 237},  {238, 19, 46},
     {76, 76, 76},    {153, 153, 153}, {255, 0, 0},     {255, 127, 0},   {190, 190, 0},   {0, 255, 0},
@@ -298,26 +298,13 @@ int nms(BoxVec *objects, int *picked_box_idx, float thresh)
 
 void draw_boxxes(unsigned char *pixels, int pixel_w, int pixel_h, BoxVec *objects)
 {
-    union {
-        struct {
-            uint8_t r;
-            uint8_t g;
-            uint8_t b;
-            uint8_t a;
-        };
-        uint32_t rgba;
-    } color;
     for (size_t i = 0; i < objects->num_item; i++)
     {
-        BoxInfo box = BoxVec_getItem(i, objects);
-        color.r     = color_list[i][0];
-        color.g     = color_list[i][1];
-        color.b     = color_list[i][2];
-        color.a     = 255;
-        ncnn_draw_rectangle_c3(pixels, pixel_w, pixel_h, box.x1, box.y1, box.x2 - box.x1, box.y2 - box.y1, color.rgba,
-                               3);
-        ncnn_draw_text_c3(pixels, pixel_w, pixel_h, class_names[box.label], (int)box.x1 + 1, (int)box.y1 + 1, 7,
-                          (int)color.rgba);
+        BoxInfo box  = BoxVec_getItem(i, objects);
+        int     rgba = (color_list[i][2] << 24) | (color_list[i][1] << 16) | (color_list[i][0] << 8) | 255;
+
+        ncnn_draw_rectangle_c3(pixels, pixel_w, pixel_h, box.x1, box.y1, box.x2 - box.x1, box.y2 - box.y1, rgba, 3);
+        ncnn_draw_text_c3(pixels, pixel_w, pixel_h, class_names[box.label], (int)box.x1 + 1, (int)box.y1 + 1, 7, rgba);
     }
 }
 

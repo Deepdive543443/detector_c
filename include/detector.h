@@ -2,7 +2,7 @@
 #include "c_api.h"
 
 extern const char *class_names[];
-extern const int   color_list[80][3];
+extern const uint8_t   color_list[80][3];
 
 /**
  * @ https://stackoverflow.com/questions/4694401/how-to-replicate-vector-in-c
