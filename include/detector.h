@@ -1,8 +1,10 @@
-#pragma once
+#ifndef DETECTOR_C_H
+#define DETECTOR_C_H
+
 #include "c_api.h"
 
-extern const char *class_names[];
-extern const uint8_t   color_list[80][3];
+extern const char   *class_names[];
+extern const uint8_t color_list[80][3];
 
 /**
  * @ https://stackoverflow.com/questions/4694401/how-to-replicate-vector-in-c
@@ -75,3 +77,5 @@ Detector create_nanodet(int input_size, const char *param, const char *bin);
  */
 
 Detector create_fastestdet(int input_size, const char *param, const char *bin);
+
+#endif  // DETECTOR_C_H

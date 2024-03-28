@@ -47,11 +47,9 @@ void create_box_vector(BoxVec *box_vector, size_t capacity)
 BoxInfo BoxVec_getItem(size_t index, void *self_ptr)
 {
     BoxVec *boxVec = (BoxVec *)self_ptr;
-    if (index < boxVec->num_item && index >= 0)
-    {
+    if (index < boxVec->num_item && index >= 0) {
         return boxVec->data[index];
-    } else
-    {
+    } else {
         printf("Index:%d out of range\n", index);
         return boxVec->data[boxVec->num_item - 1];
     }
@@ -62,13 +60,11 @@ BoxInfo BoxVec_pop(void *self_ptr)
     BoxVec *boxVec = (BoxVec *)self_ptr;
     BoxInfo empty_box;
 
-    if (boxVec->num_item > 0)
-    {
+    if (boxVec->num_item > 0) {
         empty_box = boxVec->data[boxVec->num_item - 1];
         boxVec->num_item--;
         return empty_box;
-    } else
-    {
+    } else {
         printf("No box in vector\n");
         return empty_box;
     }
@@ -79,8 +75,7 @@ BoxInfo BoxVec_remove(size_t index, void *self_ptr)
     BoxVec *boxVec = (BoxVec *)self_ptr;
     BoxInfo empty  = {-1, -1, -1, -1, -1, -1};
 
-    if (index < boxVec->num_item - 1 && index >= 0)
-    {
+    if (index < boxVec->num_item - 1 && index >= 0) {
         int num_to_copy = boxVec->num_item - index + 1;
         empty           = boxVec->data[index];
         BoxInfo temp[num_to_copy];
@@ -91,8 +86,7 @@ BoxInfo BoxVec_remove(size_t index, void *self_ptr)
 
         boxVec->num_item--;
         return empty;
-    } else if (index == boxVec->num_item - 1)
-    {
+    } else if (index == boxVec->num_item - 1) {
         return BoxVec_pop(self_ptr);
     }
     printf("Index:%d out of range\n", index);
@@ -102,21 +96,17 @@ BoxInfo BoxVec_remove(size_t index, void *self_ptr)
 void BoxVec_push_back(BoxInfo item, void *self_ptr)
 {
     BoxVec *boxVec = (BoxVec *)self_ptr;
-    if (boxVec->capacity == boxVec->num_item)
-    {
+    if (boxVec->capacity == boxVec->num_item) {
         void *data_ptr = realloc(boxVec->data, sizeof(BoxInfo) * (boxVec->capacity + 20));
-        if (data_ptr == NULL)
-        {
+        if (data_ptr == NULL) {
             printf("Ran out of mem\n");
-        } else
-        {
+        } else {
             boxVec->data                   = (BoxInfo *)data_ptr;
             boxVec->data[boxVec->num_item] = item;
             boxVec->capacity += 20;
             boxVec->num_item++;
         }
-    } else if (boxVec->capacity > boxVec->num_item)
-    {
+    } else if (boxVec->capacity > boxVec->num_item) {
         boxVec->data[boxVec->num_item] = item;
         boxVec->num_item++;
     }
@@ -125,21 +115,17 @@ void BoxVec_push_back(BoxInfo item, void *self_ptr)
 void BoxVec_insert(BoxInfo item, size_t index, void *self_ptr)
 {
     BoxVec *boxVec = (BoxVec *)self_ptr;
-    if (index == boxVec->num_item)
-    {
+    if (index == boxVec->num_item) {
         BoxVec_push_back(item, self_ptr);
         return;
     }
 
-    if (boxVec->capacity == boxVec->num_item)
-    {
+    if (boxVec->capacity == boxVec->num_item) {
         void *data_ptr = realloc(boxVec->data, sizeof(BoxInfo) * (boxVec->capacity + 20));
-        if (data_ptr == NULL)
-        {
+        if (data_ptr == NULL) {
             printf("Ran out of mem\n");
             return;
-        } else
-        {
+        } else {
             boxVec->data = (BoxInfo *)data_ptr;
             boxVec->capacity += 20;
         }
@@ -158,12 +144,10 @@ void BoxVec_fit_size(void *self_ptr)
 {
     BoxVec *boxVec   = (BoxVec *)self_ptr;
     void   *data_ptr = realloc(boxVec->data, sizeof(BoxInfo) * (boxVec->num_item));
-    if (data_ptr == NULL)
-    {
+    if (data_ptr == NULL) {
         printf("Ran out of mem\n");
         return;
-    } else
-    {
+    } else {
         boxVec->data     = (BoxInfo *)data_ptr;
         boxVec->capacity = boxVec->num_item;
     }
@@ -192,21 +176,18 @@ float fast_tanh(float x) { return 2.f / (1.f + fast_exp(-2 * x)) - 1.f; }
 int activation_function_softmax_inplace(float *src, int length)
 {
     float alpha = -FLT_MAX;
-    for (int i = 0; i < length; ++i)
-    {
+    for (int i = 0; i < length; ++i) {
         if (alpha < src[i]) alpha = src[i];
     }
 
     float denominator = 0.f;
 
-    for (int i = 0; i < length; ++i)
-    {
+    for (int i = 0; i < length; ++i) {
         src[i] = fast_exp(src[i] - alpha);
         denominator += src[i];
     }
 
-    for (int i = 0; i < length; ++i)
-    {
+    for (int i = 0; i < length; ++i) {
         src[i] /= denominator;
     }
     return 0;
@@ -219,14 +200,12 @@ void qsort_descent_inplace(BoxVec *objects, int left, int right)
 
     float p = BoxVec_getItem((int)(left + right) / 2, objects).prob;
 
-    while (i <= j)
-    {
+    while (i <= j) {
         while (BoxVec_getItem(i, objects).prob > p) i++;
 
         while (BoxVec_getItem(j, objects).prob < p) j--;
 
-        if (i <= j)
-        {
+        if (i <= j) {
             // swap
             BoxInfo temp = BoxVec_getItem(i, objects);
             memcpy(&objects->data[i], &objects->data[j], sizeof(BoxInfo));
@@ -265,19 +244,16 @@ int nms(BoxVec *objects, int *picked_box_idx, float thresh)
     int   num_picked = 0;
     float areas[objects->num_item];
 
-    for (int i = 0; i < objects->num_item; i++)
-    {
+    for (int i = 0; i < objects->num_item; i++) {
         BoxInfo box = BoxVec_getItem(i, objects);
         areas[i]    = (box.x2 - box.x1) * (box.y2 - box.y1);
     }
 
-    for (int i = 0; i < objects->num_item; i++)
-    {
+    for (int i = 0; i < objects->num_item; i++) {
         BoxInfo *boxA = &objects->data[i];
         int      keep = 1;
 
-        for (int j = 0; j < num_picked; j++)
-        {
+        for (int j = 0; j < num_picked; j++) {
             BoxInfo *boxB = &objects->data[picked_box_idx[j]];
 
             float inter_area = intersection(boxA, boxB);
@@ -286,8 +262,7 @@ int nms(BoxVec *objects, int *picked_box_idx, float thresh)
             if (inter_area / union_area > thresh) keep = 0;
         }
 
-        if (keep == 1)
-        {
+        if (keep == 1) {
             picked_box_idx[num_picked] = i;
             num_picked++;
         }
@@ -298,8 +273,7 @@ int nms(BoxVec *objects, int *picked_box_idx, float thresh)
 
 void draw_boxxes(unsigned char *pixels, int pixel_w, int pixel_h, BoxVec *objects)
 {
-    for (size_t i = 0; i < objects->num_item; i++)
-    {
+    for (size_t i = 0; i < objects->num_item; i++) {
         BoxInfo box  = BoxVec_getItem(i, objects);
         int     rgba = (color_list[i][2] << 24) | (color_list[i][1] << 16) | (color_list[i][0] << 8) | 255;
 

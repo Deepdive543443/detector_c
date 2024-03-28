@@ -29,27 +29,22 @@ static BoxVec fastestdet_detect(unsigned char *pixels, int pixel_w, int pixel_h,
     BoxVec proposals;
     create_box_vector(&proposals, 50);
 
-    for (int h = 0; h < out_h; h++)
-    {
+    for (int h = 0; h < out_h; h++) {
         float *w_ptr = &data_ptr[h * out_w];
-        for (int w = 0; w < out_w; w++)
-        {
+        for (int w = 0; w < out_w; w++) {
             float obj_score     = w_ptr[0];
             float max_cls_score = 0.0;
             int   max_cls_idx   = -1;
 
-            for (int c = 0; c < 80; c++)
-            {
+            for (int c = 0; c < 80; c++) {
                 float cls_score = w_ptr[(c + 5) * c_step];
-                if (cls_score > max_cls_score)
-                {
+                if (cls_score > max_cls_score) {
                     max_cls_score = cls_score;
                     max_cls_idx   = c;
                 }
             }
 
-            if (pow(max_cls_score, 0.4) * pow(obj_score, 0.6) > 0.65)
-            {
+            if (pow(max_cls_score, 0.4) * pow(obj_score, 0.6) > 0.65) {
                 float x_offset   = fast_tanh(w_ptr[c_step]);
                 float y_offset   = fast_tanh(w_ptr[c_step * 2]);
                 float box_width  = fast_sigmoid(w_ptr[c_step * 3]);
@@ -72,8 +67,7 @@ static BoxVec fastestdet_detect(unsigned char *pixels, int pixel_w, int pixel_h,
     }
 
     BoxVec_fit_size(&proposals);
-    if (proposals.num_item > 2)
-    {
+    if (proposals.num_item > 2) {
         qsort_descent_inplace(&proposals, 0, proposals.num_item - 1);
     }
 
@@ -83,8 +77,7 @@ static BoxVec fastestdet_detect(unsigned char *pixels, int pixel_w, int pixel_h,
     BoxVec objects;
     create_box_vector(&objects, num_picked);
 
-    for (int i = 0; i < num_picked; i++)
-    {
+    for (int i = 0; i < num_picked; i++) {
         BoxInfo box = BoxVec_getItem(picked_box_idx[i], &proposals);
 
         box.x1 = fmaxf(fminf(box.x1, (float)(pixel_w - 1)), 0.f);

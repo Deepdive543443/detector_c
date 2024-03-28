@@ -15,33 +15,26 @@ static void generate_proposals(ncnn_mat_t dis_pred, ncnn_mat_t cls_pred, int str
     float *cls_data = (float *)ncnn_mat_get_data(cls_pred);
     float *dis_data = (float *)ncnn_mat_get_data(dis_pred);
 
-    for (int i = 0; i < num_grid_y; i++)
-    {
-        for (int j = 0; j < num_grid_x; j++)
-        {
+    for (int i = 0; i < num_grid_y; i++) {
+        for (int j = 0; j < num_grid_x; j++) {
             float *score_ptr = &cls_data[i * num_grid_x + j];
             float  max_score = -FLT_MAX;
             int    max_label = -1;
 
-            for (int cls = 0; cls < num_class; cls++)
-            {
-                if (score_ptr[cls * cstep_cls] > max_score)
-                {
+            for (int cls = 0; cls < num_class; cls++) {
+                if (score_ptr[cls * cstep_cls] > max_score) {
                     max_score = score_ptr[cls * cstep_cls];
                     max_label = cls;
                 }
             }
 
-            if (max_score >= prob_thresh)
-            {
+            if (max_score >= prob_thresh) {
                 float  pred_ltrb[4];
                 float *dis_ptr = &dis_data[(j * reg_max_1 * 4) + (i * hstep_dis)];
-                for (int k = 0; k < 4; k++)
-                {
+                for (int k = 0; k < 4; k++) {
                     float dis = 0.f;
                     activation_function_softmax_inplace(dis_ptr, 8);
-                    for (int reg = 0; reg < reg_max_1; reg++)
-                    {
+                    for (int reg = 0; reg < reg_max_1; reg++) {
                         dis += reg * dis_ptr[reg];
                     }
                     pred_ltrb[k] = dis * stride;
@@ -72,13 +65,11 @@ static BoxVec nanodet_detect(unsigned char *pixels, int pixel_w, int pixel_h, vo
 
     int   w, h;
     float scale;
-    if (pixel_w > pixel_h)
-    {
+    if (pixel_w > pixel_h) {
         scale = (float)self->input_size / pixel_w;
         w     = self->input_size;
         h     = pixel_h * scale;
-    } else
-    {
+    } else {
         scale = (float)self->input_size / pixel_h;
         h     = self->input_size;
         w     = pixel_w * scale;
@@ -115,8 +106,7 @@ static BoxVec nanodet_detect(unsigned char *pixels, int pixel_w, int pixel_h, vo
     create_box_vector(&proposals, 50);
     const char *outputs[] = {"dis8", "cls8", "dis16", "cls16", "dis32", "cls32", "dis64", "cls64"};
     int         strides[] = {8, 16, 32, 64};
-    for (int i = 0; i < 4; i++)
-    {
+    for (int i = 0; i < 4; i++) {
         ncnn_mat_t out_mat_dis;
         ncnn_mat_t out_mat_cls;
         ncnn_extractor_extract(ex, outputs[i * 2], &out_mat_dis);
@@ -132,8 +122,7 @@ static BoxVec nanodet_detect(unsigned char *pixels, int pixel_w, int pixel_h, vo
      */
 
     BoxVec_fit_size(&proposals);
-    if (proposals.num_item > 2)
-    {
+    if (proposals.num_item > 2) {
         qsort_descent_inplace(&proposals, 0, proposals.num_item - 1);
     }
 
@@ -147,8 +136,7 @@ static BoxVec nanodet_detect(unsigned char *pixels, int pixel_w, int pixel_h, vo
     BoxVec objects;
     create_box_vector(&objects, num_picked);
 
-    for (int i = 0; i < num_picked; i++)
-    {
+    for (int i = 0; i < num_picked; i++) {
         BoxInfo box = BoxVec_getItem(picked_box_idx[i], &proposals);
 
         box.x1 = (box.x1 - (wpad / 2)) / scale;
