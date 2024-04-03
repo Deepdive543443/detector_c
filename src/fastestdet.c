@@ -21,10 +21,10 @@ static BoxVec fastestdet_detect(unsigned char *pixels, int pixel_w, int pixel_h,
 
     ncnn_mat_destroy(mat);
 
-    int    c_step   = ncnn_mat_get_cstep(out_mat);
-    int    out_h    = ncnn_mat_get_h(out_mat);
-    int    out_w    = ncnn_mat_get_w(out_mat);
-    float *data_ptr = (float *)ncnn_mat_get_data(out_mat);
+    const int c_step   = ncnn_mat_get_cstep(out_mat);
+    const int out_h    = ncnn_mat_get_h(out_mat);
+    const int out_w    = ncnn_mat_get_w(out_mat);
+    float    *data_ptr = (float *)ncnn_mat_get_data(out_mat);
 
     BoxVec proposals;
     create_box_vector(&proposals, 50);
