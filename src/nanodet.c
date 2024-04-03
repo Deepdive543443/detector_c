@@ -164,6 +164,7 @@ Detector create_nanodet(int input_size, const char *param, const char *bin)
     Detector nanodet;
 
     nanodet.net = ncnn_net_create();
+    set_model_options(&nanodet.net);
     ncnn_net_load_param(nanodet.net, param);
     ncnn_net_load_model(nanodet.net, bin);
 

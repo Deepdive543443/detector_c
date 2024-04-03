@@ -37,6 +37,11 @@ const uint8_t color_list[80][3] = {
     {80, 182, 188},  {127, 127, 0},
 };
 
+// Pool allocator
+static ncnn_allocator_t s_workspace_pool_allocator = 0;
+static ncnn_allocator_t s_blob_pool_allocator      = 0;
+static ncnn_option_t    s_opt                      = 0;
+
 void create_box_vector(BoxVec *box_vector, size_t capacity)
 {
     box_vector->capacity = capacity;
@@ -157,6 +162,24 @@ void BoxVec_free(void *self_ptr)
 {
     BoxVec *boxVec = (BoxVec *)self_ptr;
     free(boxVec->data);
+}
+
+Detector detector_init()
+{
+    Detector det_init = create_nanodet(320, "romfs:nanodet-plus-m_416_int8.param", "romfs:nanodet-plus-m_416_int8.bin");
+    s_workspace_pool_allocator = ncnn_allocator_create_pool_allocator();
+    s_blob_pool_allocator      = ncnn_allocator_create_unlocked_pool_allocator();
+
+    return det_init;
+}
+
+void set_model_options(ncnn_net_t *net)
+{
+    s_opt = ncnn_option_create();
+    ncnn_option_set_blob_allocator(s_opt, s_blob_pool_allocator);
+    ncnn_option_set_workspace_allocator(s_opt, s_workspace_pool_allocator);
+
+    ncnn_net_set_option(*net, s_opt);
 }
 
 float fast_exp(float x)
@@ -282,4 +305,14 @@ void draw_boxxes(unsigned char *pixels, int pixel_w, int pixel_h, BoxVec *object
     }
 }
 
-void destroy_detector(Detector *det) { ncnn_net_destroy(det->net); }
+void destroy_detector(Detector *det)
+{
+    ncnn_allocator_destroy(s_workspace_pool_allocator);
+    ncnn_allocator_destroy(s_blob_pool_allocator);
+    ncnn_option_destroy(s_opt);
+    s_workspace_pool_allocator = 0;
+    s_blob_pool_allocator      = 0;
+    s_opt                      = 0;
+
+    ncnn_net_destroy(det->net);
+}

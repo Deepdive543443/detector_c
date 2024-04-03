@@ -10,7 +10,6 @@ extern const uint8_t color_list[80][3];
  * @ https://stackoverflow.com/questions/4694401/how-to-replicate-vector-in-c
  *  -- Dynamic array of boxxes
  */
-
 typedef struct {
     float x1;
     float y1;
@@ -39,21 +38,23 @@ void    BoxVec_fit_size(void *self_ptr);
 /**
  * Detector modules
  */
-
-typedef BoxVec (*detect_func_ptr)(unsigned char *pixels, int pixel_w, int pixel_h, void *self_ptr);
-
 typedef struct {
-    ncnn_net_t      net;
-    int             input_size;
-    float           mean_vals[3];
-    float           norm_vals[3];
-    detect_func_ptr detect;
+    ncnn_net_t net;
+    int        input_size;
+    float      mean_vals[3];
+    float      norm_vals[3];
+    BoxVec (*detect)(unsigned char *pixels, int pixel_w, int pixel_h, void *self_ptr);
 } Detector;
+
+/**
+ * -- Pool allocator assignee
+ */
+Detector detector_init();
+void     set_model_options(ncnn_net_t *net);
 
 /**
  * -- General function that share with all detector
  */
-
 float fast_exp(float x);
 float fast_sigmoid(float x);
 float fast_tanh(float x);
@@ -69,13 +70,11 @@ void destroy_detector(Detector *det);
 /**
  * -- Nanodet's modules
  */
-
 Detector create_nanodet(int input_size, const char *param, const char *bin);
 
 /**
  * -- FastestDet's modules
  */
-
 Detector create_fastestdet(int input_size, const char *param, const char *bin);
 
 #endif  // DETECTOR_C_H
