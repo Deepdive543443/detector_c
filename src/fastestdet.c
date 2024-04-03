@@ -42,10 +42,10 @@ static BoxVec fastestdet_detect(unsigned char *pixels, int pixel_w, int pixel_h,
             }
 
             if (pow(max_cls_score, 0.4) * pow(obj_score, 0.6) > 0.65) {
-                float x_offset   = fast_tanh(w_ptr[c_step]);
-                float y_offset   = fast_tanh(w_ptr[c_step * 2]);
-                float box_width  = fast_sigmoid(w_ptr[c_step * 3]);
-                float box_height = fast_sigmoid(w_ptr[c_step * 4]);
+                float x_offset   = FAST_TANH(w_ptr[c_step]);
+                float y_offset   = FAST_TANH(w_ptr[c_step * 2]);
+                float box_width  = FAST_SIGMOID(w_ptr[c_step * 3]);
+                float box_height = FAST_SIGMOID(w_ptr[c_step * 4]);
                 float x_center   = (w + x_offset) / out_w;
                 float y_center   = (h + y_offset) / out_h;
 

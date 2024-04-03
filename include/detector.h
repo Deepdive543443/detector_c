@@ -55,11 +55,19 @@ void     set_model_options(ncnn_net_t *net);
 /**
  * -- General function that share with all detector
  */
-float fast_exp(float x);
-float fast_sigmoid(float x);
-float fast_tanh(float x);
-int   activation_function_softmax_inplace(float *src, int length);
+static inline float fast_exp(float x)
+{
+    union {
+        __uint32_t i;
+        float      f;
+    } v;
+    v.i = (1 << 23) * (1.4426950409 * x + 126.93490512f);
+    return v.f;
+}
+#define FAST_SIGMOID(X) (1.0f / (1.0f + fast_exp(-X)))
+#define FAST_TANH(X)    (2.f / (1.f + fast_exp(-2 * X)) - 1.f)
 
+int   activation_function_softmax_inplace(float *src, int length);
 void  qsort_descent_inplace(BoxVec *objects, int left, int right);
 float intersection(BoxInfo *box1, BoxInfo *box2);
 int   nms(BoxVec *objects, int *idx, float thresh);
