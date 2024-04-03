@@ -84,10 +84,9 @@ static BoxVec nanodet_detect(unsigned char *pixels, int pixel_w, int pixel_h, vo
 
     ncnn_mat_t mat = ncnn_mat_from_pixels_resize(pixels, NCNN_MAT_PIXEL_BGR, pixel_w, pixel_h, pixel_w * 3, w, h, NULL);
 
-    ncnn_mat_t    mat_pad = ncnn_mat_create();
-    ncnn_option_t opt     = ncnn_option_create();
+    ncnn_mat_t mat_pad = ncnn_mat_create();
     ncnn_copy_make_border(mat, mat_pad, hpad / 2, hpad - hpad / 2, wpad / 2, wpad - wpad / 2, NCNN_BORDER_CONSTANT, 0.f,
-                          opt);
+                          NULL);
     ncnn_mat_destroy(mat);
 
     /**
@@ -105,7 +104,7 @@ static BoxVec nanodet_detect(unsigned char *pixels, int pixel_w, int pixel_h, vo
     BoxVec proposals;
     create_box_vector(&proposals, 50);
     const char *outputs[] = {"dis8", "cls8", "dis16", "cls16", "dis32", "cls32", "dis64", "cls64"};
-    int         strides[] = {8, 16, 32, 64};
+    const int   strides[] = {8, 16, 32, 64};
     for (int i = 0; i < 4; i++) {
         ncnn_mat_t out_mat_dis;
         ncnn_mat_t out_mat_cls;
@@ -154,12 +153,11 @@ static BoxVec nanodet_detect(unsigned char *pixels, int pixel_w, int pixel_h, vo
 
     // Clean up
     BoxVec_free(&proposals);
-    ncnn_option_destroy(opt);
     ncnn_extractor_destroy(ex);
     return objects;
 }
 
-Detector create_nanodet(int input_size, const char *param, const char *bin)
+Detector create_nanodet(const int input_size, const char *param, const char *bin)
 {
     Detector nanodet;
 

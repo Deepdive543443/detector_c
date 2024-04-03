@@ -14,21 +14,18 @@ static BoxVec fastestdet_detect(unsigned char *pixels, int pixel_w, int pixel_h,
     ncnn_mat_substract_mean_normalize(mat, self->mean_vals, self->norm_vals);
     ncnn_extractor_t ex = ncnn_extractor_create(self->net);
     ncnn_extractor_input(ex, "data", mat);
-
     ncnn_mat_t out_mat;
     ncnn_extractor_extract(ex, "output", &out_mat);
     ncnn_extractor_destroy(ex);
-
     ncnn_mat_destroy(mat);
 
-    const int c_step   = ncnn_mat_get_cstep(out_mat);
-    const int out_h    = ncnn_mat_get_h(out_mat);
-    const int out_w    = ncnn_mat_get_w(out_mat);
-    float    *data_ptr = (float *)ncnn_mat_get_data(out_mat);
+    const int c_step = ncnn_mat_get_cstep(out_mat);
+    const int out_h  = ncnn_mat_get_h(out_mat);
+    const int out_w  = ncnn_mat_get_w(out_mat);
 
     BoxVec proposals;
     create_box_vector(&proposals, 50);
-
+    float *data_ptr = (float *)ncnn_mat_get_data(out_mat);
     for (int h = 0; h < out_h; h++) {
         float *w_ptr = &data_ptr[h * out_w];
         for (int w = 0; w < out_w; w++) {
@@ -95,7 +92,7 @@ static BoxVec fastestdet_detect(unsigned char *pixels, int pixel_w, int pixel_h,
     return objects;
 }
 
-Detector create_fastestdet(int input_size, const char *param, const char *bin)
+Detector create_fastestdet(const int input_size, const char *param, const char *bin)
 {
     Detector fastestdet;
 

@@ -70,11 +70,11 @@ void destroy_detector(Detector *det);
 /**
  * -- Nanodet's modules
  */
-Detector create_nanodet(int input_size, const char *param, const char *bin);
+Detector create_nanodet(const int input_size, const char *param, const char *bin);
 
 /**
  * -- FastestDet's modules
  */
-Detector create_fastestdet(int input_size, const char *param, const char *bin);
+Detector create_fastestdet(const int input_size, const char *param, const char *bin);
 
 #endif  // DETECTOR_C_H
