@@ -9,7 +9,7 @@ add_library( detkit ${LIB_SOURCES})
 target_include_directories(detkit PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 
 
-set(ncnn_DIR ../ncnn_3ds_master/lib/cmake/ncnn) # Link ncnn
+set(ncnn_DIR ${CMAKE_CURRENT_LIST_DIR}/../build/ncnn_3ds_master/lib/cmake/ncnn) # Link ncnn
 find_package(ncnn REQUIRED)
 target_link_libraries(detkit ncnn)
 
