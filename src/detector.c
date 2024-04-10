@@ -5,7 +5,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-
 const char *class_names[] = {
     "person",         "bicycle",    "car",           "motorcycle",    "airplane",     "bus",           "train",
     "truck",          "boat",       "traffic light", "fire hydrant",  "stop sign",    "parking meter", "bench",
@@ -50,14 +49,15 @@ void create_box_vector(BoxVec *box_vector, size_t capacity)
     box_vector->data     = (BoxInfo *)malloc(sizeof(BoxInfo) * capacity);
 }
 
-BoxInfo BoxVec_getItem(int index, void *self_ptr) {
-  BoxVec *boxVec = (BoxVec *)self_ptr;
-  if (index < boxVec->num_item && index >= 0) {
-    return boxVec->data[index];
-  } else {
-    printf("Index:%d out of range\n", index);
-    return boxVec->data[boxVec->num_item - 1];
-  }
+BoxInfo BoxVec_getItem(int index, void *self_ptr)
+{
+    BoxVec *boxVec = (BoxVec *)self_ptr;
+    if (index < boxVec->num_item && index >= 0) {
+        return boxVec->data[index];
+    } else {
+        printf("Index:%d out of range\n", index);
+        return boxVec->data[boxVec->num_item - 1];
+    }
 }
 
 BoxInfo BoxVec_pop(void *self_ptr)
@@ -75,26 +75,27 @@ BoxInfo BoxVec_pop(void *self_ptr)
     }
 }
 
-BoxInfo BoxVec_remove(int index, void *self_ptr) {
-  BoxVec *boxVec = (BoxVec *)self_ptr;
-  BoxInfo empty = {-1, -1, -1, -1, -1, -1};
+BoxInfo BoxVec_remove(int index, void *self_ptr)
+{
+    BoxVec *boxVec = (BoxVec *)self_ptr;
+    BoxInfo empty  = {-1, -1, -1, -1, -1, -1};
 
-  if (index < boxVec->num_item - 1 && index >= 0) {
-    int num_to_copy = boxVec->num_item - index + 1;
-    empty = boxVec->data[index];
-    BoxInfo temp[num_to_copy];
+    if (index < boxVec->num_item - 1 && index >= 0) {
+        int num_to_copy = boxVec->num_item - index + 1;
+        empty           = boxVec->data[index];
+        BoxInfo temp[num_to_copy];
 
-    memcpy(&temp, &boxVec->data[index + 1], sizeof(BoxInfo) * num_to_copy);
-    memset(&boxVec->data[index], 0.0, sizeof(BoxInfo) * num_to_copy + 1);
-    memcpy(&boxVec->data[index], &temp, sizeof(BoxInfo) * num_to_copy);
+        memcpy(&temp, &boxVec->data[index + 1], sizeof(BoxInfo) * num_to_copy);
+        memset(&boxVec->data[index], 0.0, sizeof(BoxInfo) * num_to_copy + 1);
+        memcpy(&boxVec->data[index], &temp, sizeof(BoxInfo) * num_to_copy);
 
-    boxVec->num_item--;
+        boxVec->num_item--;
+        return empty;
+    } else if (index == boxVec->num_item - 1) {
+        return BoxVec_pop(self_ptr);
+    }
+    printf("Index:%d out of range\n", index);
     return empty;
-  } else if (index == boxVec->num_item - 1) {
-    return BoxVec_pop(self_ptr);
-  }
-  printf("Index:%d out of range\n", index);
-  return empty;
 }
 
 void BoxVec_push_back(BoxInfo item, void *self_ptr)
@@ -224,13 +225,13 @@ void qsort_descent_inplace(BoxVec *objects, int left, int right)
         }
     }
 
-    // #pragma omp parallel sections
+    #pragma omp parallel sections
     {
-        // #pragma omp section
+        #pragma omp section
         {
             if (left < j) qsort_descent_inplace(objects, left, j);
         }
-        // #pragma omp section
+        #pragma omp section
         {
             if (i < right) qsort_descent_inplace(objects, i, right);
         }
