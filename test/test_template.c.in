@@ -1,0 +1,41 @@
+#include <stdlib.h>
+#include "detector.h"
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
+#define STB_IMAGE_WRITE_IMPLEMENTATION
+#include "stb_image_write.h"
+
+// A test Template
+int main(int argc, char **argv)
+{
+    if (argv[1] == NULL) {
+        printf(
+            "Require image path input\n"
+            "Example: ./test_xxx /path/to/image.jpg\n");
+        return 0;
+    }
+
+    Detector       det = create_@MODEL_NAME@(416, "@WEIGHT_NAME@.param",
+                                        "@WEIGHT_NAME@.bin");  // TODO -- Function and file name
+    int            width, height, n;
+    unsigned char *pixels = (unsigned char *)stbi_load(argv[1], &width, &height, &n, 0);
+    printf("width %d, height %d, n %d\n", width, height, n);
+
+    if (pixels == NULL) {
+        printf("Fail to load image %s\n", argv[1]);
+        return 0;
+    }
+
+    BoxVec boxxes = det.detect(pixels, width, height, &det);
+    draw_boxxes(pixels, width, height, &boxxes);
+
+    system("mkdir -p test_output");
+    stbi_write_bmp("test_output/@WEIGHT_NAME@.bmp", width, height, 3, pixels);  // TODO -- File name
+    destroy_detector(&det);
+    stbi_image_free(pixels);
+    printf(
+        "Testing @WEIGHT_NAME@\n" // TODO -- File name
+        "Output testing result: %s\n",
+        argv[1]);
+    return 0;
+}

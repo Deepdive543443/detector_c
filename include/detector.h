@@ -1,6 +1,8 @@
 #ifndef DETECTOR_C_H
 #define DETECTOR_C_H
 
+#include <stdint.h>
+
 #include "c_api.h"
 
 extern const char   *class_names[];
@@ -27,11 +29,11 @@ typedef struct {
 } BoxVec;
 
 void    create_box_vector(BoxVec *box_vector, size_t capacity);
-BoxInfo BoxVec_getItem(size_t index, void *self_ptr);
+BoxInfo BoxVec_getItem(int index, void *self_ptr);
 BoxInfo BoxVec_pop(void *self_ptr);
-BoxInfo BoxVec_remove(size_t index, void *self_ptr);
+BoxInfo BoxVec_remove(int index, void *self_ptr);
 void    BoxVec_push_back(BoxInfo item, void *self_ptr);
-void    BoxVec_insert(BoxInfo item, size_t index, void *self_ptr);
+void BoxVec_insert(BoxInfo item, int index, void *self_ptr);
 void    BoxVec_free(void *self_ptr);
 void    BoxVec_fit_size(void *self_ptr);
 
