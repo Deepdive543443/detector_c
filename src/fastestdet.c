@@ -97,7 +97,7 @@ Detector create_fastestdet(const int input_size, const char *param, const char *
     Detector fastestdet;
 
     fastestdet.net = ncnn_net_create();
-    set_model_options(&fastestdet.net);
+    set_model_default_options(&fastestdet.net);
     ncnn_net_load_param(fastestdet.net, param);
     ncnn_net_load_model(fastestdet.net, bin);
 

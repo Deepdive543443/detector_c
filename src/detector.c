@@ -1,9 +1,8 @@
-#include "detector.h"
-
 #include <float.h>
 #include <math.h>
 #include <stdlib.h>
 #include <string.h>
+#include "detector.h"
 
 const char *class_names[] = {
     "person",         "bicycle",    "car",           "motorcycle",    "airplane",     "bus",           "train",
@@ -173,7 +172,7 @@ Detector detector_init()
     return det_init;
 }
 
-void set_model_options(ncnn_net_t *net)
+void set_model_default_options(ncnn_net_t *net)
 {
     s_opt = ncnn_option_create();
     ncnn_option_set_blob_allocator(s_opt, s_blob_pool_allocator);

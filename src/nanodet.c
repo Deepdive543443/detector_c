@@ -78,20 +78,11 @@ static BoxVec nanodet_detect(unsigned char *pixels, int pixel_w, int pixel_h, vo
     int wpad = (w + 31) / 32 * 32 - w;
     int hpad = (h + 31) / 32 * 32 - h;
 
-    /**
-     * Create the NCNN matirx using pixels data
-     */
-
     ncnn_mat_t mat = ncnn_mat_from_pixels_resize(pixels, NCNN_MAT_PIXEL_BGR, pixel_w, pixel_h, pixel_w * 3, w, h, NULL);
-
     ncnn_mat_t mat_pad = ncnn_mat_create();
     ncnn_copy_make_border(mat, mat_pad, hpad / 2, hpad - hpad / 2, wpad / 2, wpad - wpad / 2, NCNN_BORDER_CONSTANT, 0.f,
                           NULL);
     ncnn_mat_destroy(mat);
-
-    /**
-     * Create the extractor
-     */
 
     ncnn_mat_substract_mean_normalize(mat_pad, self->mean_vals, self->norm_vals);
     ncnn_extractor_t ex = ncnn_extractor_create(self->net);
@@ -100,7 +91,6 @@ static BoxVec nanodet_detect(unsigned char *pixels, int pixel_w, int pixel_h, vo
     /**
      * Extract output from 4 scales
      */
-
     BoxVec proposals;
     create_box_vector(&proposals, 50);
     const char *outputs[] = {"dis8", "cls8", "dis16", "cls16", "dis32", "cls32", "dis64", "cls64"};
@@ -119,7 +109,6 @@ static BoxVec nanodet_detect(unsigned char *pixels, int pixel_w, int pixel_h, vo
     /**
      * Sort, non-max supression
      */
-
     BoxVec_fit_size(&proposals);
     if (proposals.num_item > 2) {
         qsort_descent_inplace(&proposals, 0, proposals.num_item - 1);
@@ -131,7 +120,6 @@ static BoxVec nanodet_detect(unsigned char *pixels, int pixel_w, int pixel_h, vo
     /**
      * Scale back and shift
      */
-
     BoxVec objects;
     create_box_vector(&objects, num_picked);
 
@@ -162,7 +150,7 @@ Detector create_nanodet(const int input_size, const char *param, const char *bin
     Detector nanodet;
 
     nanodet.net = ncnn_net_create();
-    set_model_options(&nanodet.net);
+    set_model_default_options(&nanodet.net);
     ncnn_net_load_param(nanodet.net, param);
     ncnn_net_load_model(nanodet.net, bin);
 

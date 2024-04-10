@@ -2,7 +2,6 @@
 #define DETECTOR_C_H
 
 #include <stdint.h>
-
 #include "c_api.h"
 
 extern const char   *class_names[];
@@ -33,7 +32,7 @@ BoxInfo BoxVec_getItem(int index, void *self_ptr);
 BoxInfo BoxVec_pop(void *self_ptr);
 BoxInfo BoxVec_remove(int index, void *self_ptr);
 void    BoxVec_push_back(BoxInfo item, void *self_ptr);
-void BoxVec_insert(BoxInfo item, int index, void *self_ptr);
+void    BoxVec_insert(BoxInfo item, int index, void *self_ptr);
 void    BoxVec_free(void *self_ptr);
 void    BoxVec_fit_size(void *self_ptr);
 
@@ -52,7 +51,7 @@ typedef struct {
  * -- Pool allocator assignee
  */
 Detector detector_init();
-void     set_model_options(ncnn_net_t *net);
+void     set_model_default_options(ncnn_net_t *net);
 
 /**
  * -- General function that share with all detector
