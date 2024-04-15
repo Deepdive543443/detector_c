@@ -79,7 +79,7 @@ void destroy_detector(Detector *det);
 /**
  * -- Nanodet's modules
  */
-Detector create_nanodet(const int input_size, const char *param, const char *bin);
+Detector create_nanodet_plus(const int input_size, const char *param, const char *bin);
 
 /**
  * -- FastestDet's modules

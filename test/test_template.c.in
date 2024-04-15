@@ -15,7 +15,7 @@ int main(int argc, char **argv)
         return 0;
     }
 
-    Detector       det = create_@MODEL_NAME@(416, "@WEIGHT_NAME@.param",
+    Detector       det = create_@MODEL_NAME@(@INPUT_SIZE@, "@WEIGHT_NAME@.param",
                                         "@WEIGHT_NAME@.bin");
     int            width, height, n;
     unsigned char *pixels = (unsigned char *)stbi_load(argv[1], &width, &height, &n, 0);

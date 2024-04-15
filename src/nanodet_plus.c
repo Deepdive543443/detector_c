@@ -59,7 +59,7 @@ static void generate_proposals(ncnn_mat_t dis_pred, ncnn_mat_t cls_pred, int str
     }
 }
 
-static BoxVec nanodet_detect(unsigned char *pixels, int pixel_w, int pixel_h, void *self_ptr)
+static BoxVec nanodet_plus_detect(unsigned char *pixels, int pixel_w, int pixel_h, void *self_ptr)
 {
     Detector *self = (Detector *)self_ptr;
 
@@ -145,23 +145,23 @@ static BoxVec nanodet_detect(unsigned char *pixels, int pixel_w, int pixel_h, vo
     return objects;
 }
 
-Detector create_nanodet(const int input_size, const char *param, const char *bin)
+Detector create_nanodet_plus(const int input_size, const char *param, const char *bin)
 {
-    Detector nanodet;
+    Detector nanodet_plus;
 
-    nanodet.net = ncnn_net_create();
-    set_model_default_options(&nanodet.net);
-    ncnn_net_load_param(nanodet.net, param);
-    ncnn_net_load_model(nanodet.net, bin);
+    nanodet_plus.net = ncnn_net_create();
+    set_model_default_options(&nanodet_plus.net);
+    ncnn_net_load_param(nanodet_plus.net, param);
+    ncnn_net_load_model(nanodet_plus.net, bin);
 
-    nanodet.input_size   = input_size;
-    nanodet.mean_vals[0] = 103.53f;
-    nanodet.mean_vals[1] = 116.28f;
-    nanodet.mean_vals[2] = 123.675f;
-    nanodet.norm_vals[0] = 1.f / 57.375f;
-    nanodet.norm_vals[1] = 1.f / 57.12f;
-    nanodet.norm_vals[2] = 1.f / 58.395f;
+    nanodet_plus.input_size   = input_size;
+    nanodet_plus.mean_vals[0] = 103.53f;
+    nanodet_plus.mean_vals[1] = 116.28f;
+    nanodet_plus.mean_vals[2] = 123.675f;
+    nanodet_plus.norm_vals[0] = 1.f / 57.375f;
+    nanodet_plus.norm_vals[1] = 1.f / 57.12f;
+    nanodet_plus.norm_vals[2] = 1.f / 58.395f;
 
-    nanodet.detect = &nanodet_detect;
-    return nanodet;
+    nanodet_plus.detect = &nanodet_plus_detect;
+    return nanodet_plus;
 }

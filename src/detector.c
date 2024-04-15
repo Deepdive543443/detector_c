@@ -165,7 +165,7 @@ void BoxVec_free(void *self_ptr)
 
 Detector detector_init()
 {
-    Detector det_init = create_nanodet(320, "romfs:nanodet-plus-m_416_int8.param", "romfs:nanodet-plus-m_416_int8.bin");
+    Detector det_init = create_nanodet_plus(320, "romfs:nanodet-plus-m_416_int8.param", "romfs:nanodet-plus-m_416_int8.bin");
     s_workspace_pool_allocator = ncnn_allocator_create_pool_allocator();
     s_blob_pool_allocator      = ncnn_allocator_create_unlocked_pool_allocator();
 

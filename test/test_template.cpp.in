@@ -1,0 +1,26 @@
+#include <iostream>
+#include "opencv2/highgui/highgui.hpp"  // opencv
+#include "detector.hpp"
+
+int main(int argc, char **argv)
+{
+    const char *image_name = argv[1] == NULL ? "test2.jpg" : argv[1];
+    const int   use_gpu    = argv[2] == NULL ? 0 : atoi(argv[2]);
+
+    det::Detector *det_ptr = det::create_@MODEL_NAME@();
+    det_ptr->load(@INPUT_SIZE@, "@WEIGHT_NAME@.param", "@WEIGHT_NAME@.bin", use_gpu);
+    det_ptr->info();
+
+    std::vector<det::Object> objs;
+    
+    cv::Mat input_img = cv::imread(image_name, cv::IMREAD_COLOR);
+    det_ptr->detect(input_img, objs);
+    det_ptr->draw_boxxes(input_img, objs);
+
+    std::cout << "Testing @WEIGHT_NAME@" << std::endl;
+    std::cout << "Output testing result of " << image_name << std::endl;
+
+    std::system("mkdir -p test_output");
+    cv::imwrite("test_output/@WEIGHT_NAME@.png", input_img);
+    return 0;
+}
