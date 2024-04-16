@@ -13,5 +13,5 @@ set(ncnn_DIR ${NCNN_DIR}) # Link ncnn
 find_package(ncnn REQUIRED)
 target_link_libraries(detkit ncnn)
 
-install(TARGETS detkit DESTINATION ${CMAKE_CURRENT_LIST_DIR}/../build/detector)
-install(FILES ${CMAKE_CURRENT_LIST_DIR}/include/detector.h DESTINATION ${CMAKE_CURRENT_LIST_DIR}/../build/detector)
+install(TARGETS detkit DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/install)
+install(FILES ${CMAKE_CURRENT_LIST_DIR}/include/detector.h DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/install)
