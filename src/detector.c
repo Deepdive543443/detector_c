@@ -55,7 +55,7 @@ int BoxVec_push_back(BoxInfo item, void *self_ptr)
     if (boxVec->capacity == boxVec->num_item) {
         void *data_ptr = realloc(boxVec->data, sizeof(BoxInfo) * (boxVec->capacity + 20));
         if (data_ptr == NULL) {
-            printf("Ran out of mem\n");
+            printf("[DETKIT] Ran out of mem\n");
             return 0;
         } else {
             boxVec->data                   = (BoxInfo *)data_ptr;
@@ -78,7 +78,7 @@ int BoxVec_insert(BoxInfo item, int index, void *self_ptr)
     if (boxVec->capacity == boxVec->num_item) {
         void *data_ptr = realloc(boxVec->data, sizeof(BoxInfo) * (boxVec->capacity + 20));
         if (data_ptr == NULL) {
-            printf("Ran out of mem\n");
+            printf("[DETKIT] Ran out of mem\n");
             return 0;
         } else {
             boxVec->data = (BoxInfo *)data_ptr;
@@ -101,7 +101,7 @@ int BoxVec_fit_size(void *self_ptr)
     BoxVec *boxVec   = (BoxVec *)self_ptr;
     void   *data_ptr = realloc(boxVec->data, sizeof(BoxInfo) * (boxVec->num_item));
     if (data_ptr == NULL) {
-        printf("Ran out of mem\n");
+        printf("[DETKIT] Ran out of mem\n");
         return 0;
     } else {
         boxVec->data     = (BoxInfo *)data_ptr;
