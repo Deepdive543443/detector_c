@@ -2,6 +2,8 @@
 #include <math.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdint.h>
+#include "c_api.h"
 #include "detector.h"
 
 const char *class_names[] = {
@@ -174,12 +176,13 @@ Detector detector_init()
     return det_init;
 }
 
-void set_model_default_options(ncnn_net_t *net)
+void set_model_default_options(void *net_ctx)
 {
+    ncnn_net_t *net = (ncnn_net_t *)net_ctx;
+
     s_opt = ncnn_option_create();
     ncnn_option_set_blob_allocator(s_opt, s_blob_pool_allocator);
     ncnn_option_set_workspace_allocator(s_opt, s_workspace_pool_allocator);
-
     ncnn_net_set_option(*net, s_opt);
 }
 
@@ -303,5 +306,6 @@ void destroy_detector(Detector *det)
     s_blob_pool_allocator      = 0;
     s_opt                      = 0;
 
-    ncnn_net_destroy(det->net);
+    ncnn_net_destroy(*(ncnn_net_t *)det->net_ctx);
+    free(det->net_ctx);
 }

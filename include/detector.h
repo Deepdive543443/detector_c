@@ -1,9 +1,6 @@
 #ifndef DETECTOR_C_H
 #define DETECTOR_C_H
 
-#include <stdint.h>
-#include "c_api.h"
-
 extern const char   *class_names[];
 extern const uint8_t color_list[80][3];
 
@@ -40,7 +37,7 @@ BoxInfo BoxVec_remove(int index, void *self_ptr);
  * Detector modules
  */
 typedef struct {
-    ncnn_net_t net;
+    void      *net_ctx;
     int        input_size;
     float      mean_vals[3];
     float      norm_vals[3];
@@ -51,7 +48,7 @@ typedef struct {
  * -- Pool allocator assignee
  */
 Detector detector_init();
-void     set_model_default_options(ncnn_net_t *net);
+void     set_model_default_options(void *net_ctx);
 
 /**
  * -- General function that share with all detector

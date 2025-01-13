@@ -1,5 +1,8 @@
 #include <float.h>
 #include <math.h>
+#include <stdlib.h>
+#include <stdint.h>
+#include "c_api.h"
 #include "detector.h"
 
 static void generate_proposals(ncnn_mat_t dis_pred, ncnn_mat_t cls_pred, int stride, float prob_thresh, BoxVec *objects)
@@ -61,7 +64,8 @@ static void generate_proposals(ncnn_mat_t dis_pred, ncnn_mat_t cls_pred, int str
 
 static BoxVec nanodet_plus_detect(unsigned char *pixels, int pixel_w, int pixel_h, void *self_ptr)
 {
-    Detector *self = (Detector *)self_ptr;
+    Detector   *self = (Detector *)self_ptr;
+    ncnn_net_t *net  = (ncnn_net_t *)self->net_ctx;
 
     int   w, h;
     float scale;
@@ -85,7 +89,7 @@ static BoxVec nanodet_plus_detect(unsigned char *pixels, int pixel_w, int pixel_
     ncnn_mat_destroy(mat);
 
     ncnn_mat_substract_mean_normalize(mat_pad, self->mean_vals, self->norm_vals);
-    ncnn_extractor_t ex = ncnn_extractor_create(self->net);
+    ncnn_extractor_t ex = ncnn_extractor_create(*net);
     ncnn_extractor_input(ex, "data", mat_pad);
 
     /**
@@ -146,13 +150,15 @@ static BoxVec nanodet_plus_detect(unsigned char *pixels, int pixel_w, int pixel_
 
 Detector create_nanodet_plus(const int input_size, const char *param, const char *bin)
 {
+    ncnn_net_t *net = (ncnn_net_t *)malloc(sizeof(ncnn_net_t));
+
+    *net = ncnn_net_create();
+    set_model_default_options(net);
+    ncnn_net_load_param(*net, param);
+    ncnn_net_load_model(*net, bin);
+
     Detector nanodet_plus;
-
-    nanodet_plus.net = ncnn_net_create();
-    set_model_default_options(&nanodet_plus.net);
-    ncnn_net_load_param(nanodet_plus.net, param);
-    ncnn_net_load_model(nanodet_plus.net, bin);
-
+    nanodet_plus.net_ctx      = (void *)net;
     nanodet_plus.input_size   = input_size;
     nanodet_plus.mean_vals[0] = 103.53f;
     nanodet_plus.mean_vals[1] = 116.28f;

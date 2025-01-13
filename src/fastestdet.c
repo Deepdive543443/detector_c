@@ -1,10 +1,14 @@
 #include <float.h>
 #include <math.h>
+#include <stdlib.h>
+#include <stdint.h>
+#include "c_api.h"
 #include "detector.h"
 
 static BoxVec fastestdet_detect(unsigned char *pixels, int pixel_w, int pixel_h, void *self_ptr)
 {
-    Detector *self = (Detector *)self_ptr;
+    Detector   *self = (Detector *)self_ptr;
+    ncnn_net_t *net  = (ncnn_net_t *)self->net_ctx;
 
     // Resize
     ncnn_mat_t mat = ncnn_mat_from_pixels_resize(pixels, NCNN_MAT_PIXEL_BGR, pixel_w, pixel_h, pixel_w * 3,
@@ -12,7 +16,7 @@ static BoxVec fastestdet_detect(unsigned char *pixels, int pixel_w, int pixel_h,
 
     // Create extractor
     ncnn_mat_substract_mean_normalize(mat, self->mean_vals, self->norm_vals);
-    ncnn_extractor_t ex = ncnn_extractor_create(self->net);
+    ncnn_extractor_t ex = ncnn_extractor_create(*net);
     ncnn_extractor_input(ex, "data", mat);
     ncnn_mat_t out_mat;
     ncnn_extractor_extract(ex, "output", &out_mat);
@@ -93,13 +97,15 @@ static BoxVec fastestdet_detect(unsigned char *pixels, int pixel_w, int pixel_h,
 
 Detector create_fastestdet(const int input_size, const char *param, const char *bin)
 {
+    ncnn_net_t *net = (ncnn_net_t *)malloc(sizeof(ncnn_net_t));
+
+    *net = ncnn_net_create();
+    set_model_default_options(net);
+    ncnn_net_load_param(*net, param);
+    ncnn_net_load_model(*net, bin);
+
     Detector fastestdet;
-
-    fastestdet.net = ncnn_net_create();
-    set_model_default_options(&fastestdet.net);
-    ncnn_net_load_param(fastestdet.net, param);
-    ncnn_net_load_model(fastestdet.net, bin);
-
+    fastestdet.net_ctx      = (void *)net;
     fastestdet.input_size   = input_size;
     fastestdet.mean_vals[0] = 0.0f;
     fastestdet.mean_vals[1] = 0.0f;
