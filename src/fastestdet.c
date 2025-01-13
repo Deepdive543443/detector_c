@@ -23,66 +23,65 @@ static BoxVec fastestdet_detect(unsigned char *pixels, int pixel_w, int pixel_h,
     const int out_h  = ncnn_mat_get_h(out_mat);
     const int out_w  = ncnn_mat_get_w(out_mat);
 
-    BoxVec proposals;
-    create_box_vector(&proposals, 50);
-    float *data_ptr = (float *)ncnn_mat_get_data(out_mat);
-    for (int h = 0; h < out_h; h++) {
-        float *w_ptr = &data_ptr[h * out_w];
-        for (int w = 0; w < out_w; w++) {
-            float obj_score     = w_ptr[0];
-            float max_cls_score = 0.0;
-            int   max_cls_idx   = -1;
+    BoxVec proposals = {.data = NULL, .capacity = 0, .num_item = 0};
+    if (create_box_vector(&proposals, 50)) {
+        float *data_ptr = (float *)ncnn_mat_get_data(out_mat);
+        for (int h = 0; h < out_h; h++) {
+            float *w_ptr = &data_ptr[h * out_w];
+            for (int w = 0; w < out_w; w++) {
+                float obj_score     = w_ptr[0];
+                float max_cls_score = 0.0;
+                int   max_cls_idx   = -1;
 
-            for (int c = 0; c < 80; c++) {
-                float cls_score = w_ptr[(c + 5) * c_step];
-                if (cls_score > max_cls_score) {
-                    max_cls_score = cls_score;
-                    max_cls_idx   = c;
+                for (int c = 0; c < 80; c++) {
+                    float cls_score = w_ptr[(c + 5) * c_step];
+                    if (cls_score > max_cls_score) {
+                        max_cls_score = cls_score;
+                        max_cls_idx   = c;
+                    }
                 }
+
+                if (pow(max_cls_score, 0.4) * pow(obj_score, 0.6) > 0.65) {
+                    float x_offset   = FAST_TANH(w_ptr[c_step]);
+                    float y_offset   = FAST_TANH(w_ptr[c_step * 2]);
+                    float box_width  = FAST_SIGMOID(w_ptr[c_step * 3]);
+                    float box_height = FAST_SIGMOID(w_ptr[c_step * 4]);
+                    float x_center   = (w + x_offset) / out_w;
+                    float y_center   = (h + y_offset) / out_h;
+
+                    BoxInfo info;
+                    info.x1    = (x_center - 0.5 * box_width) * pixel_w;
+                    info.y1    = (y_center - 0.5 * box_height) * pixel_h;
+                    info.x2    = (x_center + 0.5 * box_width) * pixel_w;
+                    info.y2    = (y_center + 0.5 * box_height) * pixel_h;
+                    info.label = max_cls_idx;
+                    info.prob  = obj_score;
+
+                    BoxVec_push_back(info, &proposals);
+                }
+                w_ptr++;
             }
-
-            if (pow(max_cls_score, 0.4) * pow(obj_score, 0.6) > 0.65) {
-                float x_offset   = FAST_TANH(w_ptr[c_step]);
-                float y_offset   = FAST_TANH(w_ptr[c_step * 2]);
-                float box_width  = FAST_SIGMOID(w_ptr[c_step * 3]);
-                float box_height = FAST_SIGMOID(w_ptr[c_step * 4]);
-                float x_center   = (w + x_offset) / out_w;
-                float y_center   = (h + y_offset) / out_h;
-
-                BoxInfo info;
-                info.x1    = (x_center - 0.5 * box_width) * pixel_w;
-                info.y1    = (y_center - 0.5 * box_height) * pixel_h;
-                info.x2    = (x_center + 0.5 * box_width) * pixel_w;
-                info.y2    = (y_center + 0.5 * box_height) * pixel_h;
-                info.label = max_cls_idx;
-                info.prob  = obj_score;
-
-                BoxVec_push_back(info, &proposals);
-            }
-            w_ptr++;
         }
     }
 
-    BoxVec_fit_size(&proposals);
-    if (proposals.num_item > 2) {
+    BoxVec objects = {.data = NULL, .capacity = 0, .num_item = 0};
+    if (proposals.num_item > 2 && BoxVec_fit_size(&proposals)) {
         qsort_descent_inplace(&proposals, 0, proposals.num_item - 1);
-    }
+        int picked_box_idx[proposals.num_item];
+        int num_picked = nms(&proposals, picked_box_idx, 0.65f);
 
-    int picked_box_idx[proposals.num_item];
-    int num_picked = nms(&proposals, picked_box_idx, 0.65f);
+        create_box_vector(&objects, num_picked);
 
-    BoxVec objects;
-    create_box_vector(&objects, num_picked);
+        for (int i = 0; i < num_picked; i++) {
+            BoxInfo box = BoxVec_getItem(picked_box_idx[i], &proposals);
 
-    for (int i = 0; i < num_picked; i++) {
-        BoxInfo box = BoxVec_getItem(picked_box_idx[i], &proposals);
+            box.x1 = fmaxf(fminf(box.x1, (float)(pixel_w - 1)), 0.f);
+            box.y1 = fmaxf(fminf(box.y1, (float)(pixel_h - 1)), 0.f);
+            box.x2 = fmaxf(fminf(box.x2, (float)(pixel_w - 1)), 0.f);
+            box.y2 = fmaxf(fminf(box.y2, (float)(pixel_h - 1)), 0.f);
 
-        box.x1 = fmaxf(fminf(box.x1, (float)(pixel_w - 1)), 0.f);
-        box.y1 = fmaxf(fminf(box.y1, (float)(pixel_h - 1)), 0.f);
-        box.x2 = fmaxf(fminf(box.x2, (float)(pixel_w - 1)), 0.f);
-        box.y2 = fmaxf(fminf(box.y2, (float)(pixel_h - 1)), 0.f);
-
-        BoxVec_push_back(box, &objects);
+            BoxVec_push_back(box, &objects);
+        }
     }
 
     // Clean up

@@ -27,14 +27,14 @@ typedef struct {
     size_t   num_item;
 } BoxVec;
 
-void    create_box_vector(BoxVec *box_vector, size_t capacity);
+int     create_box_vector(BoxVec *box_vector, size_t capacity);
+int     BoxVec_push_back(BoxInfo item, void *self_ptr);
+int     BoxVec_insert(BoxInfo item, int index, void *self_ptr);
+int     BoxVec_fit_size(void *self_ptr);
+void    BoxVec_free(void *self_ptr);
 BoxInfo BoxVec_getItem(int index, void *self_ptr);
 BoxInfo BoxVec_pop(void *self_ptr);
 BoxInfo BoxVec_remove(int index, void *self_ptr);
-void    BoxVec_push_back(BoxInfo item, void *self_ptr);
-void    BoxVec_insert(BoxInfo item, int index, void *self_ptr);
-void    BoxVec_free(void *self_ptr);
-void    BoxVec_fit_size(void *self_ptr);
 
 /**
  * Detector modules

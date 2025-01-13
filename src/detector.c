@@ -41,11 +41,73 @@ static ncnn_allocator_t s_workspace_pool_allocator = 0;
 static ncnn_allocator_t s_blob_pool_allocator      = 0;
 static ncnn_option_t    s_opt                      = 0;
 
-void create_box_vector(BoxVec *box_vector, size_t capacity)
+int create_box_vector(BoxVec *box_vector, size_t capacity)
 {
     box_vector->capacity = capacity;
     box_vector->num_item = 0;
     box_vector->data     = (BoxInfo *)malloc(sizeof(BoxInfo) * capacity);
+    return box_vector->data ? 1 : 0;
+}
+
+int BoxVec_push_back(BoxInfo item, void *self_ptr)
+{
+    BoxVec *boxVec = (BoxVec *)self_ptr;
+    if (boxVec->capacity == boxVec->num_item) {
+        void *data_ptr = realloc(boxVec->data, sizeof(BoxInfo) * (boxVec->capacity + 20));
+        if (data_ptr == NULL) {
+            printf("Ran out of mem\n");
+            return 0;
+        } else {
+            boxVec->data                   = (BoxInfo *)data_ptr;
+            boxVec->data[boxVec->num_item] = item;
+            boxVec->capacity += 20;
+            boxVec->num_item++;
+        }
+    } else if (boxVec->capacity > boxVec->num_item) {
+        boxVec->data[boxVec->num_item] = item;
+        boxVec->num_item++;
+    }
+    return 1;
+}
+
+int BoxVec_insert(BoxInfo item, int index, void *self_ptr)
+{
+    BoxVec *boxVec = (BoxVec *)self_ptr;
+    if (index == boxVec->num_item) return BoxVec_push_back(item, self_ptr);
+
+    if (boxVec->capacity == boxVec->num_item) {
+        void *data_ptr = realloc(boxVec->data, sizeof(BoxInfo) * (boxVec->capacity + 20));
+        if (data_ptr == NULL) {
+            printf("Ran out of mem\n");
+            return 0;
+        } else {
+            boxVec->data = (BoxInfo *)data_ptr;
+            boxVec->capacity += 20;
+        }
+    }
+
+    int     num_to_copy = boxVec->num_item - index;
+    BoxInfo temp[num_to_copy];
+
+    memcpy(&temp, &boxVec->data[index], sizeof(BoxInfo) * num_to_copy);
+    boxVec->data[index] = item;
+    memcpy(&boxVec->data[index + 1], &temp, sizeof(BoxInfo) * num_to_copy);
+    boxVec->num_item++;
+    return 1;
+}
+
+int BoxVec_fit_size(void *self_ptr)
+{
+    BoxVec *boxVec   = (BoxVec *)self_ptr;
+    void   *data_ptr = realloc(boxVec->data, sizeof(BoxInfo) * (boxVec->num_item));
+    if (data_ptr == NULL) {
+        printf("Ran out of mem\n");
+        return 0;
+    } else {
+        boxVec->data     = (BoxInfo *)data_ptr;
+        boxVec->capacity = boxVec->num_item;
+    }
+    return 1;
 }
 
 BoxInfo BoxVec_getItem(int index, void *self_ptr)
@@ -95,66 +157,6 @@ BoxInfo BoxVec_remove(int index, void *self_ptr)
     }
     printf("Index:%d out of range\n", index);
     return empty;
-}
-
-void BoxVec_push_back(BoxInfo item, void *self_ptr)
-{
-    BoxVec *boxVec = (BoxVec *)self_ptr;
-    if (boxVec->capacity == boxVec->num_item) {
-        void *data_ptr = realloc(boxVec->data, sizeof(BoxInfo) * (boxVec->capacity + 20));
-        if (data_ptr == NULL) {
-            printf("Ran out of mem\n");
-        } else {
-            boxVec->data                   = (BoxInfo *)data_ptr;
-            boxVec->data[boxVec->num_item] = item;
-            boxVec->capacity += 20;
-            boxVec->num_item++;
-        }
-    } else if (boxVec->capacity > boxVec->num_item) {
-        boxVec->data[boxVec->num_item] = item;
-        boxVec->num_item++;
-    }
-}
-
-void BoxVec_insert(BoxInfo item, int index, void *self_ptr)
-{
-    BoxVec *boxVec = (BoxVec *)self_ptr;
-    if (index == boxVec->num_item) {
-        BoxVec_push_back(item, self_ptr);
-        return;
-    }
-
-    if (boxVec->capacity == boxVec->num_item) {
-        void *data_ptr = realloc(boxVec->data, sizeof(BoxInfo) * (boxVec->capacity + 20));
-        if (data_ptr == NULL) {
-            printf("Ran out of mem\n");
-            return;
-        } else {
-            boxVec->data = (BoxInfo *)data_ptr;
-            boxVec->capacity += 20;
-        }
-    }
-
-    int     num_to_copy = boxVec->num_item - index;
-    BoxInfo temp[num_to_copy];
-
-    memcpy(&temp, &boxVec->data[index], sizeof(BoxInfo) * num_to_copy);
-    boxVec->data[index] = item;
-    memcpy(&boxVec->data[index + 1], &temp, sizeof(BoxInfo) * num_to_copy);
-    boxVec->num_item++;
-}
-
-void BoxVec_fit_size(void *self_ptr)
-{
-    BoxVec *boxVec   = (BoxVec *)self_ptr;
-    void   *data_ptr = realloc(boxVec->data, sizeof(BoxInfo) * (boxVec->num_item));
-    if (data_ptr == NULL) {
-        printf("Ran out of mem\n");
-        return;
-    } else {
-        boxVec->data     = (BoxInfo *)data_ptr;
-        boxVec->capacity = boxVec->num_item;
-    }
 }
 
 void BoxVec_free(void *self_ptr)
@@ -281,12 +283,14 @@ int nms(BoxVec *objects, int *picked_box_idx, float thresh)
 
 void draw_boxxes(unsigned char *pixels, int pixel_w, int pixel_h, BoxVec *objects)
 {
-    for (size_t i = 0; i < objects->num_item; i++) {
-        BoxInfo box  = BoxVec_getItem(i, objects);
-        int     rgba = (color_list[i][2] << 24) | (color_list[i][1] << 16) | (color_list[i][0] << 8) | 255;
+    if (objects->num_item) {
+        for (size_t i = 0; i < objects->num_item; i++) {
+            BoxInfo box  = BoxVec_getItem(i, objects);
+            int     rgba = (color_list[i][2] << 24) | (color_list[i][1] << 16) | (color_list[i][0] << 8) | 255;
 
-        ncnn_draw_rectangle_c3(pixels, pixel_w, pixel_h, box.x1, box.y1, box.x2 - box.x1, box.y2 - box.y1, rgba, 3);
-        ncnn_draw_text_c3(pixels, pixel_w, pixel_h, class_names[box.label], (int)box.x1 + 1, (int)box.y1 + 1, 7, rgba);
+            ncnn_draw_rectangle_c3(pixels, pixel_w, pixel_h, box.x1, box.y1, box.x2 - box.x1, box.y2 - box.y1, rgba, 3);
+            ncnn_draw_text_c3(pixels, pixel_w, pixel_h, class_names[box.label], (int)box.x1 + 1, (int)box.y1 + 1, 7, rgba);
+        }
     }
 }
 

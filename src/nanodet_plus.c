@@ -91,52 +91,51 @@ static BoxVec nanodet_plus_detect(unsigned char *pixels, int pixel_w, int pixel_
     /**
      * Extract output from 4 scales
      */
-    BoxVec proposals;
-    create_box_vector(&proposals, 50);
-    const char *outputs[] = {"dis8", "cls8", "dis16", "cls16", "dis32", "cls32", "dis64", "cls64"};
-    const int   strides[] = {8, 16, 32, 64};
-    for (int i = 0; i < 4; i++) {
-        ncnn_mat_t out_mat_dis;
-        ncnn_mat_t out_mat_cls;
-        ncnn_extractor_extract(ex, outputs[i * 2], &out_mat_dis);
-        ncnn_extractor_extract(ex, outputs[i * 2 + 1], &out_mat_cls);
-        generate_proposals(out_mat_dis, out_mat_cls, strides[i], 0.4f, &proposals);  // prob thresh 0.4
+    BoxVec proposals = {.data = NULL, .capacity = 0, .num_item = 0};
+    if (create_box_vector(&proposals, 50)) {
+        const char *outputs[] = {"dis8", "cls8", "dis16", "cls16", "dis32", "cls32", "dis64", "cls64"};
+        const int   strides[] = {8, 16, 32, 64};
+        for (int i = 0; i < 4; i++) {
+            ncnn_mat_t out_mat_dis;
+            ncnn_mat_t out_mat_cls;
+            ncnn_extractor_extract(ex, outputs[i * 2], &out_mat_dis);
+            ncnn_extractor_extract(ex, outputs[i * 2 + 1], &out_mat_cls);
+            generate_proposals(out_mat_dis, out_mat_cls, strides[i], 0.4f, &proposals);  // prob thresh 0.4
 
-        ncnn_mat_destroy(out_mat_dis);
-        ncnn_mat_destroy(out_mat_cls);
+            ncnn_mat_destroy(out_mat_dis);
+            ncnn_mat_destroy(out_mat_cls);
+        }
     }
 
-    /**
-     * Sort, non-max supression
-     */
-    BoxVec_fit_size(&proposals);
-    if (proposals.num_item > 2) {
+    BoxVec objects = {.data = NULL, .capacity = 0, .num_item = 0};
+    if (proposals.num_item > 2 && BoxVec_fit_size(&proposals)) {
+        /**
+         * Sort, non-max supression
+         */
         qsort_descent_inplace(&proposals, 0, proposals.num_item - 1);
-    }
+        int picked_box_idx[proposals.num_item];
+        int num_picked = nms(&proposals, picked_box_idx, 0.5f);  // nms thresh 0.5
 
-    int picked_box_idx[proposals.num_item];
-    int num_picked = nms(&proposals, picked_box_idx, 0.5f);  // nms thresh 0.5
+        /**
+         * Scale back and shift
+         */
+        create_box_vector(&objects, num_picked);
 
-    /**
-     * Scale back and shift
-     */
-    BoxVec objects;
-    create_box_vector(&objects, num_picked);
+        for (int i = 0; i < num_picked; i++) {
+            BoxInfo box = BoxVec_getItem(picked_box_idx[i], &proposals);
 
-    for (int i = 0; i < num_picked; i++) {
-        BoxInfo box = BoxVec_getItem(picked_box_idx[i], &proposals);
+            box.x1 = (box.x1 - (wpad / 2)) / scale;
+            box.x2 = (box.x2 - (wpad / 2)) / scale;
+            box.y1 = (box.y1 - (hpad / 2)) / scale;
+            box.y2 = (box.y2 - (hpad / 2)) / scale;
 
-        box.x1 = (box.x1 - (wpad / 2)) / scale;
-        box.x2 = (box.x2 - (wpad / 2)) / scale;
-        box.y1 = (box.y1 - (hpad / 2)) / scale;
-        box.y2 = (box.y2 - (hpad / 2)) / scale;
+            box.x1 = fmaxf(fminf(box.x1, (float)(pixel_w - 1)), 0.f);
+            box.y1 = fmaxf(fminf(box.y1, (float)(pixel_h - 1)), 0.f);
+            box.x2 = fmaxf(fminf(box.x2, (float)(pixel_w - 1)), 0.f);
+            box.y2 = fmaxf(fminf(box.y2, (float)(pixel_h - 1)), 0.f);
 
-        box.x1 = fmaxf(fminf(box.x1, (float)(pixel_w - 1)), 0.f);
-        box.y1 = fmaxf(fminf(box.y1, (float)(pixel_h - 1)), 0.f);
-        box.x2 = fmaxf(fminf(box.x2, (float)(pixel_w - 1)), 0.f);
-        box.y2 = fmaxf(fminf(box.y2, (float)(pixel_h - 1)), 0.f);
-
-        BoxVec_push_back(box, &objects);
+            BoxVec_push_back(box, &objects);
+        }
     }
 
     // Clean up
