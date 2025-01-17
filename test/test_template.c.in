@@ -26,13 +26,18 @@ int main(int argc, char **argv)
         return 0;
     }
 
-    BoxVec boxxes = det.detect(pixels, width, height, &det);
-    draw_boxxes(pixels, width, height, &boxxes);
+    for (int i = 0; i < 1000; i++) {
+        BoxVec boxxes = det.detect(pixels, width, height, &det);
+        draw_boxxes(pixels, width, height, &boxxes);
 
-    system("mkdir -p test_output");
-    stbi_write_bmp("test_output/@WEIGHT_NAME@.bmp", width, height, 3, pixels);
+        system("mkdir -p test_output");
+        stbi_write_bmp("test_output/@WEIGHT_NAME@.bmp", width, height, 3, pixels);   
+        printf("Test %d\n", i);
+    }
+
     destroy_detector(&det);
     stbi_image_free(pixels);
+
     printf(
         "Testing @WEIGHT_NAME@\n"
         "Output testing result: %s\n",

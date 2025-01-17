@@ -110,6 +110,7 @@ static BoxVec nanodet_plus_detect(unsigned char *pixels, int pixel_w, int pixel_
             ncnn_mat_destroy(out_mat_cls);
         }
     }
+    ncnn_mat_destroy(mat_pad);
 
     BoxVec objects = {.data = NULL, .capacity = 0, .num_item = 0};
     if (proposals.num_item > 2 && BoxVec_fit_size(&proposals)) {

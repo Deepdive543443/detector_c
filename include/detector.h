@@ -1,6 +1,8 @@
 #ifndef DETECTOR_C_H
 #define DETECTOR_C_H
 
+#include <stdint.h>
+
 extern const char   *class_names[];
 extern const uint8_t color_list[80][3];
 
