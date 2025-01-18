@@ -26,9 +26,10 @@ int main(int argc, char **argv)
         return 0;
     }
 
-    for (int i = 0; i < 1000; i++) {
+    for (int i = 0; i < 500; i++) {
         BoxVec boxxes = det.detect(pixels, width, height, &det);
         draw_boxxes(pixels, width, height, &boxxes);
+        BoxVec_free(&boxxes);
 
         system("mkdir -p test_output");
         stbi_write_bmp("test_output/@WEIGHT_NAME@.bmp", width, height, 3, pixels);   

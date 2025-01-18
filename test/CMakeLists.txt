@@ -5,20 +5,9 @@ project(detkit VERSION 0.1.0 LANGUAGES C CXX)
 
 include(${CMAKE_CURRENT_LIST_DIR}/cmake/AddTest.cmake)
 
-option(TEST_C "Build C API test" ON)
-option(TEST_CPP "Build CPP test" OFF)
-
-set(ncnn_DIR ${NCNN_DIR})
-find_package(ncnn REQUIRED)
-
 configure_file(${CMAKE_CURRENT_LIST_DIR}/../include/detector.h ${CMAKE_CURRENT_BINARY_DIR}/detector.h COPYONLY)
 configure_file(${CMAKE_CURRENT_LIST_DIR}/../include/stb_image.h ${CMAKE_CURRENT_BINARY_DIR}/stb_image.h COPYONLY)
 configure_file(${CMAKE_CURRENT_LIST_DIR}/../include/stb_image_write.h ${CMAKE_CURRENT_BINARY_DIR}/stb_image_write.h COPYONLY)
-
-file( GLOB LIB_SOURCES ${CMAKE_CURRENT_LIST_DIR}/../src/*.c)
-add_library( detkit ${LIB_SOURCES})
-target_include_directories(detkit PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
-target_link_libraries(detkit ncnn)
 
 add_test_c(nanodet_plus nanodet-plus-m_416_int8 416)
 add_test_c(fastestdet FastestDet 352)
