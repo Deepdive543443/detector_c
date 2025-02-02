@@ -1,5 +1,5 @@
-#ifndef DETECTOR_H
-#define DETECTOR_H
+#ifndef DETECTOR_HPP
+#define DETECTOR_HPP
 
 #include "net.h"
 #include "detncnn.h"
@@ -32,4 +32,4 @@ class Detector {
     ncnn::PoolAllocator         workspace_pool_allocator;
 };
 
-#endif  // DETECTOR_H
+#endif  // DETECTOR_HPP

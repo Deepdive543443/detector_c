@@ -26,6 +26,7 @@ typedef struct {
 #define DET_OBJ_BUFSIZE 80
 
 void *nanodet_plus_init(DET_PARAM_T *opt);
+void *fastestdet_init(DET_PARAM_T *opt);
 int   det_exit(void *ctx);
 int   det_detect(void *ctx, unsigned char *rgb, int h, int w, DET_OBJ_T *output, int *out_len);
 int   det_detect_nv12(void *ctx, unsigned char *nv12, int h, int w, DET_OBJ_T *output, int *out_len);

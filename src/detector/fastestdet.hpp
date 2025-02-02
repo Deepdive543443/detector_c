@@ -12,15 +12,15 @@
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the
 // specific language governing permissions and limitations under the License.
 
-#ifndef NANODETPLUS_HPP
-#define NANODETPLUS_HPP
+#ifndef FASTESTDET_HPP
+#define FASTESTDET_HPP
 
 #include "detector.hpp"
 
-class NanoDetPlus : private Detector {
+class FastestDet : private Detector {
    public:
     virtual int load(DET_PARAM_T *opt);
     virtual int detect(unsigned char *rgb, int width, int height, std::vector<DET_OBJ_T> &objects);
 };
 
-#endif  // NANODETPLUS_HPP
+#endif  // FASTESTDET_HPP

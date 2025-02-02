@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include "net.h"
 #include "detector/nanodetplus.hpp"
+#include "detector/fastestdet.hpp"
 #include "detncnn.h"
 
 #ifdef __cplusplus
@@ -12,6 +13,13 @@ void *nanodet_plus_init(DET_PARAM_T *opt)
     Detector *nanodet_plus = (Detector *)new NanoDetPlus;
     nanodet_plus->load(opt);
     return (void *)nanodet_plus;
+}
+
+void *fastestdet_init(DET_PARAM_T *opt)
+{
+    Detector *fastestdet = (Detector *)new FastestDet;
+    fastestdet->load(opt);
+    return (void *)fastestdet;
 }
 
 int det_exit(void *ctx)
