@@ -23,22 +23,26 @@ int det_exit(void *ctx)
     return 0;
 }
 
-int det_detect(void *ctx, unsigned char *rgb, int h, int w, DET_OBJ_T *output)
+int det_detect(void *ctx, unsigned char *rgb, int h, int w, DET_OBJ_T *output, int *out_len)
 {
     std::vector<DET_OBJ_T> objects;
     Detector *det = (Detector *)ctx;
-    det->detect(rgb, w, h, objects);
-    for (size_t i = 0; i < objects.size() && i < DET_OBJ_BUFSIZE; i++) output[i] = objects[i];
-    return 1;
+
+    if (det->detect(rgb, w, h, objects)) {
+        *out_len = objects.size() <= DET_OBJ_BUFSIZE ? objects.size() : DET_OBJ_BUFSIZE;
+        memcpy(output, &objects[0], *out_len * sizeof(DET_OBJ_T));
+        return 1;
+    }
+    return 0;
 }
 
-int det_detect_nv12(void *ctx, unsigned char *nv12, int h, int w, DET_OBJ_T *output)
+int det_detect_nv12(void *ctx, unsigned char *nv12, int h, int w, DET_OBJ_T *output, int *out_len)
 {
     unsigned char *rgb = (unsigned char *)malloc(h * w * 3);
     ncnn::yuv420sp2rgb_nv12(nv12, w, h, rgb);
-    det_detect(ctx, rgb, h, w, output);
+    int ret = det_detect(ctx, rgb, h, w, output, out_len);
     free(rgb);
-    return 1;
+    return ret;
 }
 
 #ifdef __cplusplus

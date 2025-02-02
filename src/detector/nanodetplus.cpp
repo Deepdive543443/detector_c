@@ -238,5 +238,5 @@ int NanoDetPlus::detect(unsigned char *rgb, int width, int height, std::vector<D
         bool operator()(const DET_OBJ_T &a, const DET_OBJ_T &b) const { return (a.w * a.h) > (b.w * b.h); }
     } objects_area_greater;
     std::sort(objects.begin(), objects.end(), objects_area_greater);
-    return 0;
+    return 1;
 }

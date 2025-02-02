@@ -41,17 +41,19 @@ int main(int argc, char **argv)
 
     void     *det     = nanodet_plus_init(&opt);
     DET_OBJ_T buf[DET_OBJ_BUFSIZE] = {};
+    int out_len;
     int loops = atoi(argv[2]);
     for (int i = 0; i < loops; i++) 
     {
         long long timestamp = get_time();
-        det_detect(det, rgb, height, width, buf);
+        det_detect(det, rgb, height, width, buf, &out_len);
         timestamp = get_time() - timestamp;
         printf("[%4d/%4d] Duration: %lld ms\n", i + 1, loops,timestamp);
     }
-    for (int i = 0; i < 80; i++) {
+
+    printf("%d obj detected\n", out_len);
+    for (int i = 0; i < out_len; i++) {
         if (!buf[i].prob) {
-            printf("%d obj detected\n", i);
             break;
         }
         printf("x: %f y: %f w: %f h: %f p: %f l: %d\n", buf[i].x, buf[i].y, buf[i].w, buf[i].h, buf[i].prob, buf[i].label);
