@@ -14,36 +14,39 @@ static const char *s_class_names[] = {
     "toaster",        "sink",       "refrigerator",  "book",          "clock",        "vase",          "scissors",
     "teddy bear",     "hair drier", "toothbrush"};
 
-static uint8_t s_color_list[80][3] = {
-    {216, 82, 24},   {236, 176, 31},  {125, 46, 141},  {118, 171, 47},  {76, 189, 237},  {238, 19, 46},
-    {76, 76, 76},    {153, 153, 153}, {255, 0, 0},     {255, 127, 0},   {190, 190, 0},   {0, 255, 0},
-    {0, 0, 255},     {170, 0, 255},   {84, 84, 0},     {84, 170, 0},    {84, 255, 0},    {170, 84, 0},
-    {170, 170, 0},   {170, 255, 0},   {255, 84, 0},    {255, 170, 0},   {255, 255, 0},   {0, 84, 127},
-    {0, 170, 127},   {0, 255, 127},   {84, 0, 127},    {84, 84, 127},   {84, 170, 127},  {84, 255, 127},
-    {170, 0, 127},   {170, 84, 127},  {170, 170, 127}, {170, 255, 127}, {255, 0, 127},   {255, 84, 127},
-    {255, 170, 127}, {255, 255, 127}, {0, 84, 255},    {0, 170, 255},   {0, 255, 255},   {84, 0, 255},
-    {84, 84, 255},   {84, 170, 255},  {84, 255, 255},  {170, 0, 255},   {170, 84, 255},  {170, 170, 255},
-    {170, 255, 255}, {255, 0, 255},   {255, 84, 255},  {255, 170, 255}, {42, 0, 0},      {84, 0, 0},
-    {127, 0, 0},     {170, 0, 0},     {212, 0, 0},     {255, 0, 0},     {0, 42, 0},      {0, 84, 0},
-    {0, 127, 0},     {0, 170, 0},     {0, 212, 0},     {0, 255, 0},     {0, 0, 42},      {0, 0, 84},
-    {0, 0, 127},     {0, 0, 170},     {0, 0, 212},     {0, 0, 255},     {0, 0, 0},       {36, 36, 36},
-    {72, 72, 72},    {109, 109, 109}, {145, 145, 145}, {182, 182, 182}, {218, 218, 218}, {0, 113, 188},
-    {80, 182, 188},  {127, 127, 0},
-};
+static uint32_t s_color_list[] = {
+    0x1852d8ff, 0x1fb0ecff, 0x8d2e7dff, 0x2fab76ff, 0xedbd4cff, 0x2e13eeff, 0x4c4c4cff, 0x999999ff, 0x0000ffff,
+    0x007fffff, 0x00bebeff, 0x00ff00ff, 0xff0000ff, 0xff00aaff, 0x005454ff, 0x00aa54ff, 0x00ff54ff, 0x0054aaff,
+    0x00aaaaff, 0x00ffaaff, 0x0054ffff, 0x00aaffff, 0x00ffffff, 0x7f5400ff, 0x7faa00ff, 0x7fff00ff, 0x7f0054ff,
+    0x7f5454ff, 0x7faa54ff, 0x7fff54ff, 0x7f00aaff, 0x7f54aaff, 0x7faaaaff, 0x7fffaaff, 0x7f00ffff, 0x7f54ffff,
+    0x7faaffff, 0x7fffffff, 0xff5400ff, 0xffaa00ff, 0xffff00ff, 0xff0054ff, 0xff5454ff, 0xffaa54ff, 0xffff54ff,
+    0xff00aaff, 0xff54aaff, 0xffaaaaff, 0xffffaaff, 0xff00ffff, 0xff54ffff, 0xffaaffff, 0x00002aff, 0x000054ff,
+    0x00007fff, 0x0000aaff, 0x0000d4ff, 0x0000ffff, 0x002a00ff, 0x005400ff, 0x007f00ff, 0x00aa00ff, 0x00d400ff,
+    0x00ff00ff, 0x2a0000ff, 0x540000ff, 0x7f0000ff, 0xaa0000ff, 0xd40000ff, 0xff0000ff, 0x000000ff, 0x242424ff,
+    0x484848ff, 0x6d6d6dff, 0x919191ff, 0xb6b6b6ff, 0xdadadaff, 0xbc7100ff, 0xbcb650ff, 0x007f7fff};
 
-#define DRAW_TEXT_SIZE  7
-#define DRAW_FLAG_SIZE 18
+#define DRAW_TEXT_SIZE   8
+#define DRAW_TEXT_OFFSET 4
+#define DRAW_FLAG_H      22
+#define DRAW_FLAG_OFFSET 2
+
+#define DRAW_FLAG_W   DRAW_TEXT_SIZE * 1.1
+#define DRAW_FLAG_POS DRAW_FLAG_H + DRAW_FLAG_OFFSET
+#define DRAW_TEXT_POS DRAW_FLAG_H + DRAW_TEXT_OFFSET
 int detncnn::draw_boxxes(unsigned char *rgb, int width, int height, std::vector<DET_OBJ_T> &objects)
 {
     for (size_t i = 0; i < objects.size(); i++) {
-        int rgba = (s_color_list[i][2] << 24) | (s_color_list[i][1] << 16) | (s_color_list[i][0] << 8) | 255;
-
         char text[32];
         snprintf(text, 32, "%s %.1f%%", s_class_names[objects[i].label], objects[i].prob * 100);
 
-        ncnn::draw_rectangle_c3(rgb, width, height, objects[i].x, objects[i].y, objects[i].w, objects[i].h, rgba, 3);
-        ncnn::draw_rectangle_c3(rgb, width, height, objects[i].x, objects[i].y, objects[i].w, DRAW_FLAG_SIZE, rgba, -1);
-        ncnn::draw_text_c3(rgb, width, height, text, (int)objects[i].x + 1, (int)objects[i].y + 1, DRAW_TEXT_SIZE, 0);
+        int flag_size = strlen(text) * DRAW_FLAG_W;
+
+        ncnn::draw_rectangle_c3(rgb, width, height, objects[i].x, objects[i].y, objects[i].w, objects[i].h,
+                                s_color_list[i], 3);
+        ncnn::draw_rectangle_c3(rgb, width, height, objects[i].x - 1, objects[i].y - DRAW_FLAG_POS, flag_size,
+                                DRAW_FLAG_H, s_color_list[i], -1);
+        ncnn::draw_text_c3(rgb, width, height, text, (int)objects[i].x + 1, (int)objects[i].y - DRAW_TEXT_POS,
+                           DRAW_TEXT_SIZE, 0);
     }
     return 1;
 }
