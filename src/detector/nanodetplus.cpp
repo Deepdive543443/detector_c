@@ -132,27 +132,29 @@ int NanoDetPlus::load(DET_PARAM_T *opt)
 int NanoDetPlus::detect(unsigned char *rgb, int width, int height, std::vector<DET_OBJ_T> &objects)
 {
     // pad to multiple of 32
-    int   w     = width;
-    int   h     = height;
-    float scale = 1.f, scale_stream = 1.f;
+    int   w = width;
+    int   h = height;
+    float scale_rgb, scale_stream_w, scale_stream_h;
     if (w > h) {
-        scale        = (float)target_size / w;
-        scale_stream = (float)target_size / stream_w;
-        w            = target_size;
-        h            = h * scale;
+        scale_rgb = (float)target_size / w;
+        w         = target_size;
+        h         = h * scale_rgb;
     } else {
-        scale        = (float)target_size / h;
-        scale_stream = (float)target_size / stream_h;
-        h            = target_size;
-        w            = w * scale;
+        scale_rgb = (float)target_size / h;
+        h         = target_size;
+        w         = w * scale_rgb;
     }
+
+    scale_stream_w = scale_rgb * stream_w / width;
+    scale_stream_h = scale_rgb * stream_h / height;
 
     // Resize and make border
     int       wpad = (w + 31) / 32 * 32 - w;
     int       hpad = (h + 31) / 32 * 32 - h;
     ncnn::Mat in_pad;
     {
-        ncnn::Mat in = ncnn::Mat::from_pixels_resize(rgb, ncnn::Mat::PIXEL_RGB, width, height, w, h);
+        // We suspect that this weight is trained usinga BGR data, needs more confirmation
+        ncnn::Mat in = ncnn::Mat::from_pixels_resize(rgb, ncnn::Mat::PIXEL_RGB2BGR, width, height, w, h);
         ncnn::copy_make_border(in, in_pad, hpad / 2, hpad - hpad / 2, wpad / 2, wpad - wpad / 2, ncnn::BORDER_CONSTANT, 0.f);
         in_pad.substract_mean_normalize(mean_vals, norm_vals);
     }
@@ -218,10 +220,10 @@ int NanoDetPlus::detect(unsigned char *rgb, int width, int height, std::vector<D
         objects[i] = proposals[picked[i]];
 
         // adjust offset to original unpadded
-        float x0 = (objects[i].x - (wpad / 2)) / scale_stream;
-        float y0 = (objects[i].y - (hpad / 2)) / scale_stream;
-        float x1 = (objects[i].x + objects[i].w - (wpad / 2)) / scale_stream;
-        float y1 = (objects[i].y + objects[i].h - (hpad / 2)) / scale_stream;
+        float x0 = (objects[i].x - (wpad / 2)) / scale_stream_w;
+        float y0 = (objects[i].y - (hpad / 2)) / scale_stream_h;
+        float x1 = (objects[i].x + objects[i].w - (wpad / 2)) / scale_stream_w;
+        float y1 = (objects[i].y + objects[i].h - (hpad / 2)) / scale_stream_h;
 
         // clip
         x0 = std::max(std::min(x0, (float)(width - 1)), 0.f);

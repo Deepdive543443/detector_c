@@ -4,6 +4,10 @@
 #include "net.h"
 #include "detncnn.h"
 
+namespace detncnn {
+int draw_boxxes(unsigned char *rgb, int width, int height, std::vector<DET_OBJ_T> &objects);
+}
+
 class Detector {
    public:
     Detector();

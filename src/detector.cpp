@@ -1,5 +1,53 @@
 #include "detector.hpp"
 
+static const char *g_class_names[] = {
+    "person",         "bicycle",    "car",           "motorcycle",    "airplane",     "bus",           "train",
+    "truck",          "boat",       "traffic light", "fire hydrant",  "stop sign",    "parking meter", "bench",
+    "bird",           "cat",        "dog",           "horse",         "sheep",        "cow",           "elephant",
+    "bear",           "zebra",      "giraffe",       "backpack",      "umbrella",     "handbag",       "tie",
+    "suitcase",       "frisbee",    "skis",          "snowboard",     "sports ball",  "kite",          "baseball bat",
+    "baseball glove", "skateboard", "surfboard",     "tennis racket", "bottle",       "wine glass",    "cup",
+    "fork",           "knife",      "spoon",         "bowl",          "banana",       "apple",         "sandwich",
+    "orange",         "broccoli",   "carrot",        "hot dog",       "pizza",        "donut",         "cake",
+    "chair",          "couch",      "potted plant",  "bed",           "dining table", "toilet",        "tv",
+    "laptop",         "mouse",      "remote",        "keyboard",      "cell phone",   "microwave",     "oven",
+    "toaster",        "sink",       "refrigerator",  "book",          "clock",        "vase",          "scissors",
+    "teddy bear",     "hair drier", "toothbrush"};
+
+static uint8_t g_color_list[80][3] = {
+    {216, 82, 24},   {236, 176, 31},  {125, 46, 141},  {118, 171, 47},  {76, 189, 237},  {238, 19, 46},
+    {76, 76, 76},    {153, 153, 153}, {255, 0, 0},     {255, 127, 0},   {190, 190, 0},   {0, 255, 0},
+    {0, 0, 255},     {170, 0, 255},   {84, 84, 0},     {84, 170, 0},    {84, 255, 0},    {170, 84, 0},
+    {170, 170, 0},   {170, 255, 0},   {255, 84, 0},    {255, 170, 0},   {255, 255, 0},   {0, 84, 127},
+    {0, 170, 127},   {0, 255, 127},   {84, 0, 127},    {84, 84, 127},   {84, 170, 127},  {84, 255, 127},
+    {170, 0, 127},   {170, 84, 127},  {170, 170, 127}, {170, 255, 127}, {255, 0, 127},   {255, 84, 127},
+    {255, 170, 127}, {255, 255, 127}, {0, 84, 255},    {0, 170, 255},   {0, 255, 255},   {84, 0, 255},
+    {84, 84, 255},   {84, 170, 255},  {84, 255, 255},  {170, 0, 255},   {170, 84, 255},  {170, 170, 255},
+    {170, 255, 255}, {255, 0, 255},   {255, 84, 255},  {255, 170, 255}, {42, 0, 0},      {84, 0, 0},
+    {127, 0, 0},     {170, 0, 0},     {212, 0, 0},     {255, 0, 0},     {0, 42, 0},      {0, 84, 0},
+    {0, 127, 0},     {0, 170, 0},     {0, 212, 0},     {0, 255, 0},     {0, 0, 42},      {0, 0, 84},
+    {0, 0, 127},     {0, 0, 170},     {0, 0, 212},     {0, 0, 255},     {0, 0, 0},       {36, 36, 36},
+    {72, 72, 72},    {109, 109, 109}, {145, 145, 145}, {182, 182, 182}, {218, 218, 218}, {0, 113, 188},
+    {80, 182, 188},  {127, 127, 0},
+};
+
+#define DRAW_TEXT_SIZE  7
+#define DRAW_FLAG_SIZE 18
+int detncnn::draw_boxxes(unsigned char *rgb, int width, int height, std::vector<DET_OBJ_T> &objects)
+{
+    for (size_t i = 0; i < objects.size(); i++) {
+        int rgba = (g_color_list[i][2] << 24) | (g_color_list[i][1] << 16) | (g_color_list[i][0] << 8) | 255;
+
+        char text[32];
+        snprintf(text, 32, "%s %.1f%%", g_class_names[objects[i].label], objects[i].prob * 100);
+
+        ncnn::draw_rectangle_c3(rgb, width, height, objects[i].x, objects[i].y, objects[i].w, objects[i].h, rgba, 3);
+        ncnn::draw_rectangle_c3(rgb, width, height, objects[i].x, objects[i].y, objects[i].w, DRAW_FLAG_SIZE, rgba, -1);
+        ncnn::draw_text_c3(rgb, width, height, text, (int)objects[i].x + 1, (int)objects[i].y + 1, DRAW_TEXT_SIZE, 0);
+    }
+    return 1;
+}
+
 Detector::Detector()
 {
     blob_pool_allocator.set_size_compare_ratio(0.f);

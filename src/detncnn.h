@@ -29,6 +29,7 @@ void *nanodet_plus_init(DET_PARAM_T *opt);
 int   det_exit(void *ctx);
 int   det_detect(void *ctx, unsigned char *rgb, int h, int w, DET_OBJ_T *output, int *out_len);
 int   det_detect_nv12(void *ctx, unsigned char *nv12, int h, int w, DET_OBJ_T *output, int *out_len);
+int   det_draw_boxxes(unsigned char *rgb, int h, int w, DET_OBJ_T *output, int *out_len);
 
 #ifdef __cplusplus
 }  // extern "C"
