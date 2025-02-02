@@ -15,7 +15,7 @@
 #include <cfloat>
 #include "cpu.h"
 #include "platform.h"
-#include "detector/nanodetplus.h"
+#include "detector/nanodetplus.hpp"
 
 static void generate_proposals(ncnn::Mat &cls_pred, ncnn::Mat &dis_pred, int stride, const ncnn::Mat &in_pad,
                                float prob_threshold, std::vector<DET_OBJ_T> &objects)

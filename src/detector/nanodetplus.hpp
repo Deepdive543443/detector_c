@@ -15,7 +15,7 @@
 #ifndef NANODETPLUS_H
 #define NANODETPLUS_H
 
-#include "detector.h"
+#include "detector.hpp"
 
 class NanoDetPlus : private Detector {
    public:

@@ -1,6 +1,6 @@
 #include <stdlib.h>
 #include "net.h"
-#include "detector/nanodetplus.h"
+#include "detector/nanodetplus.hpp"
 #include "detncnn.h"
 
 #ifdef __cplusplus
