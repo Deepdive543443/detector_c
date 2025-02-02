@@ -1,6 +1,6 @@
 #include "detector.hpp"
 
-static const char *g_class_names[] = {
+static const char *s_class_names[] = {
     "person",         "bicycle",    "car",           "motorcycle",    "airplane",     "bus",           "train",
     "truck",          "boat",       "traffic light", "fire hydrant",  "stop sign",    "parking meter", "bench",
     "bird",           "cat",        "dog",           "horse",         "sheep",        "cow",           "elephant",
@@ -14,7 +14,7 @@ static const char *g_class_names[] = {
     "toaster",        "sink",       "refrigerator",  "book",          "clock",        "vase",          "scissors",
     "teddy bear",     "hair drier", "toothbrush"};
 
-static uint8_t g_color_list[80][3] = {
+static uint8_t s_color_list[80][3] = {
     {216, 82, 24},   {236, 176, 31},  {125, 46, 141},  {118, 171, 47},  {76, 189, 237},  {238, 19, 46},
     {76, 76, 76},    {153, 153, 153}, {255, 0, 0},     {255, 127, 0},   {190, 190, 0},   {0, 255, 0},
     {0, 0, 255},     {170, 0, 255},   {84, 84, 0},     {84, 170, 0},    {84, 255, 0},    {170, 84, 0},
@@ -36,10 +36,10 @@ static uint8_t g_color_list[80][3] = {
 int detncnn::draw_boxxes(unsigned char *rgb, int width, int height, std::vector<DET_OBJ_T> &objects)
 {
     for (size_t i = 0; i < objects.size(); i++) {
-        int rgba = (g_color_list[i][2] << 24) | (g_color_list[i][1] << 16) | (g_color_list[i][0] << 8) | 255;
+        int rgba = (s_color_list[i][2] << 24) | (s_color_list[i][1] << 16) | (s_color_list[i][0] << 8) | 255;
 
         char text[32];
-        snprintf(text, 32, "%s %.1f%%", g_class_names[objects[i].label], objects[i].prob * 100);
+        snprintf(text, 32, "%s %.1f%%", s_class_names[objects[i].label], objects[i].prob * 100);
 
         ncnn::draw_rectangle_c3(rgb, width, height, objects[i].x, objects[i].y, objects[i].w, objects[i].h, rgba, 3);
         ncnn::draw_rectangle_c3(rgb, width, height, objects[i].x, objects[i].y, objects[i].w, DRAW_FLAG_SIZE, rgba, -1);

@@ -153,7 +153,7 @@ int NanoDetPlus::detect(unsigned char *rgb, int width, int height, std::vector<D
     int       hpad = (h + 31) / 32 * 32 - h;
     ncnn::Mat in_pad;
     {
-        // We suspect that this weight is trained usinga BGR data, needs more confirmation
+        // We suspect that this weight was trained using BGR data, needs more confirmation
         ncnn::Mat in = ncnn::Mat::from_pixels_resize(rgb, ncnn::Mat::PIXEL_RGB2BGR, width, height, w, h);
         ncnn::copy_make_border(in, in_pad, hpad / 2, hpad - hpad / 2, wpad / 2, wpad - wpad / 2, ncnn::BORDER_CONSTANT, 0.f);
         in_pad.substract_mean_normalize(mean_vals, norm_vals);
