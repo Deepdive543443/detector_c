@@ -2,6 +2,8 @@ set(project_title detncnn)
 project(${project_title})
 cmake_minimum_required(VERSION 3.14)
 
+include(${CMAKE_CURRENT_LIST_DIR}/test/AddTest.cmake)
+
 if(DEFINED ENV{PROJ_TOP_DIR})
     set(ncnn_DIR ${CMAKE_CURRENT_LIST_DIR}/lib/build/sdk/ncnn/lib/cmake/ncnn)
     find_package(ncnn REQUIRED)
@@ -21,17 +23,10 @@ add_library( detncnn ${LIB_SOURCES})
 target_include_directories(detncnn PRIVATE src ${CMAKE_CURRENT_BINARY_DIR})
 target_link_libraries(detncnn ncnn)
 
-add_executable(rgb test/rgb.c)
-target_include_directories(rgb PRIVATE src lib ${CMAKE_CURRENT_BINARY_DIR})
-target_link_libraries(rgb detncnn)
-
-add_executable(nv12 test/nv12.c)
-target_include_directories(nv12 PRIVATE src lib ${CMAKE_CURRENT_BINARY_DIR})
-target_link_libraries(nv12 detncnn)
-
-install(TARGETS rgb DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/install/bin)
-install(TARGETS nv12 DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/install/bin)
 install(TARGETS detncnn DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/install/lib)
+
+add_test_c(nanodet-plus-m_416_int8 nanodet_plus_init)
+add_test_c(FastestDet fastestdet_init)
 
 if(DEFINED ENV{PROJ_TOP_DIR})
     install(FILES ${CMAKE_CURRENT_LIST_DIR}/lib/build/sdk/ncnn/lib/libncnn.a DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/install/lib)

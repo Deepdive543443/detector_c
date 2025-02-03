@@ -16,8 +16,9 @@ static long long get_time()
 
 int main(int argc, char **argv)
 {
-    DET_PARAM_T      opt  = {.model_path = "nanodet-plus-m_416_int8", .stream_w = WIDTH, .stream_h = HEIGHT};
-    void          *det  = nanodet_plus_init(&opt);
+    DET_PARAM_T opt = {.model_path = "@CMAKE_MODEL_NAME@", .stream_w = WIDTH, .stream_h = HEIGHT};
+    void       *det = @CMAKE_INIT_FUNC@(&opt);
+
     unsigned char *nv12 = malloc(WIDTH * HEIGHT * 3 / 2);
     int            nv12_size;
 
@@ -37,20 +38,17 @@ int main(int argc, char **argv)
     }
 
     DET_OBJ_T buf[DET_OBJ_BUFSIZE] = {};
-    int out_len;
-    int loops = atoi(argv[2]);
+    int       out_len;
+    int       loops = atoi(argv[2]);
     for (int i = 0; i < loops; i++) {
         long long timestamp = get_time();
         det_detect_nv12(det, nv12, HEIGHT, WIDTH, buf, &out_len);
         timestamp = get_time() - timestamp;
-        printf("[%4d/%4d] Duration: %lld ms\n", i + 1, loops,timestamp);
+        printf("[%4d/%4d] Duration: %lld ms\n", i + 1, loops, timestamp);
     }
 
     printf("%d obj detected\n", out_len);
     for (int i = 0; i < out_len; i++) {
-        if (!buf[i].prob) {
-            break;
-        }
         printf("x: %f y: %f w: %f h: %f p: %f l: %d\n", buf[i].x, buf[i].y, buf[i].w, buf[i].h, buf[i].prob,
                buf[i].label);
     }
