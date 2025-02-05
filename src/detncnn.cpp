@@ -2,6 +2,7 @@
 #include "net.h"
 #include "detector/nanodetplus.hpp"
 #include "detector/fastestdet.hpp"
+#include "detector/rtmdet.hpp"
 #include "detncnn.h"
 
 #ifdef __cplusplus
@@ -20,6 +21,13 @@ void *fastestdet_init(DET_PARAM_T *opt)
     Detector *fastestdet = (Detector *)new FastestDet;
     fastestdet->load(opt);
     return (void *)fastestdet;
+}
+
+void *rtmdet_init(DET_PARAM_T *opt)
+{
+    Detector *rtmdet = (Detector *)new RTMDet;
+    rtmdet->load(opt);
+    return (void *)rtmdet;
 }
 
 int det_exit(void *ctx)
