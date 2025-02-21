@@ -1,4 +1,4 @@
-function(add_test_c CMAKE_MODEL_NAME CMAKE_INIT_FUNC)
+function(add_test_c CMAKE_MODEL_NAME CMAKE_MODEL_TYPE)
     configure_file(${CMAKE_CURRENT_LIST_DIR}/test/rgb.c.in ${CMAKE_CURRENT_BINARY_DIR}/rgb_${CMAKE_MODEL_NAME}.c)
 
     add_executable(rgb_${CMAKE_MODEL_NAME} ${CMAKE_CURRENT_BINARY_DIR}/rgb_${CMAKE_MODEL_NAME}.c)

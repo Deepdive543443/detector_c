@@ -9,25 +9,27 @@
 extern "C" {
 #endif
 
-void *nanodet_plus_init(DET_PARAM_T *opt)
+void *det_init(DET_PARAM_T *opt)
 {
-    Detector *nanodet_plus = (Detector *)new NanoDetPlus;
-    nanodet_plus->load(opt);
-    return (void *)nanodet_plus;
-}
+    Detector *net;
+    switch (opt->model_type) {
+        case DET_NANODETPLUS:
+            net = (Detector *)new NanoDetPlus;
+            break;
 
-void *fastestdet_init(DET_PARAM_T *opt)
-{
-    Detector *fastestdet = (Detector *)new FastestDet;
-    fastestdet->load(opt);
-    return (void *)fastestdet;
-}
+        case DET_FASTESTDET:
+            net = (Detector *)new FastestDet;
+            break;
 
-void *rtmdet_init(DET_PARAM_T *opt)
-{
-    Detector *rtmdet = (Detector *)new RTMDet;
-    rtmdet->load(opt);
-    return (void *)rtmdet;
+        case DET_RTMDET:
+            net = (Detector *)new RTMDet;
+            break;
+
+        default:
+            return NULL;
+    }
+    net->load(opt);
+    return (void *)net;
 }
 
 int det_exit(void *ctx)

@@ -25,9 +25,9 @@ target_link_libraries(detncnn ncnn)
 
 install(TARGETS detncnn DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/install/lib)
 
-add_test_c(nanodet-plus-m_416_int8 nanodet_plus_init)
-add_test_c(FastestDet fastestdet_init)
-add_test_c(rtmdet_tiny rtmdet_init)
+add_test_c(nanodet-plus-m_416_int8 DET_NANODETPLUS)
+add_test_c(FastestDet DET_FASTESTDET)
+add_test_c(rtmdet_tiny DET_RTMDET)
 
 if(DEFINED ENV{PROJ_TOP_DIR})
     install(FILES ${CMAKE_CURRENT_LIST_DIR}/lib/build/sdk/ncnn/lib/libncnn.a DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/install/lib)

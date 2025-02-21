@@ -24,8 +24,8 @@ int main(int argc, char **argv)
         return 0;
     }printf("width %d, height %d, n %d\n", width, height, n);
 
-    DET_PARAM_T opt = {.model_path = "@CMAKE_MODEL_NAME@", .stream_w = width, .stream_h = height};
-    void       *det = @CMAKE_INIT_FUNC@(&opt);
+    DET_PARAM_T opt = {.model_type = @CMAKE_MODEL_TYPE@, .model_path = "@CMAKE_MODEL_NAME@", .stream_w = width, .stream_h = height};
+    void       *det = det_init(&opt);
 
     DET_OBJ_T buf[DET_OBJ_BUFSIZE] = {};
     int       out_len;

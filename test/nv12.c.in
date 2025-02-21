@@ -16,8 +16,8 @@ static long long get_time()
 
 int main(int argc, char **argv)
 {
-    DET_PARAM_T opt = {.model_path = "@CMAKE_MODEL_NAME@", .stream_w = WIDTH, .stream_h = HEIGHT};
-    void       *det = @CMAKE_INIT_FUNC@(&opt);
+    DET_PARAM_T opt = {.model_type = @CMAKE_MODEL_TYPE@, .model_path = "@CMAKE_MODEL_NAME@", .stream_w = WIDTH, .stream_h = HEIGHT};
+    void       *det = det_init(&opt);
 
     unsigned char *nv12 = malloc(WIDTH * HEIGHT * 3 / 2);
     int            nv12_size;
