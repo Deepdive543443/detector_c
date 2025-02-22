@@ -111,10 +111,10 @@ int FastestDet::detect(unsigned char *rgb, int width, int height, std::vector<DE
             w_ptr++;
         }
     }
-    qsort_descent_inplace(proposals);
+    detncnn::qsort_descent_inplace(proposals);
 
     std::vector<int> picked;
-    nms_sorted_bboxes(proposals, picked, nms_threshold);
+    detncnn::nms_sorted_bboxes(proposals, picked, nms_threshold);
 
     int count = picked.size();
     objects.resize(count);

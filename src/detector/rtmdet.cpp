@@ -165,10 +165,10 @@ int RTMDet::detect(unsigned char *rgb, int width, int height, std::vector<DET_OB
         generate_proposal(cls_pred, dis_pred, obj32, 32, prob_threshold);
         proposals.insert(proposals.end(), obj32.begin(), obj32.end());
     }
-    qsort_descent_inplace(proposals);
+    detncnn::qsort_descent_inplace(proposals);
 
     std::vector<int> picked;
-    nms_sorted_bboxes(proposals, picked, nms_threshold);
+    detncnn::nms_sorted_bboxes(proposals, picked, nms_threshold);
 
     int count = picked.size();
     objects.resize(count);

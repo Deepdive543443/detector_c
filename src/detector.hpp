@@ -5,17 +5,16 @@
 #include "detncnn.h"
 
 namespace detncnn {
-int draw_boxxes(unsigned char *rgb, int width, int height, std::vector<DET_OBJ_T> &objects);
-}
+int  draw_boxxes(unsigned char *rgb, int width, int height, std::vector<DET_OBJ_T> &objects);
+void qsort_descent_inplace(std::vector<DET_OBJ_T> &objects, int left, int right);
+void qsort_descent_inplace(std::vector<DET_OBJ_T> &objects);
+void nms_sorted_bboxes(const std::vector<DET_OBJ_T> &objects, std::vector<int> &picked, float nms_threshold);
+}  // namespace detncnn
 
 class Detector {
    public:
     Detector();
     virtual ~Detector();
-
-    void qsort_descent_inplace(std::vector<DET_OBJ_T> &objects, int left, int right);
-    void qsort_descent_inplace(std::vector<DET_OBJ_T> &objects);
-    void nms_sorted_bboxes(const std::vector<DET_OBJ_T> &objects, std::vector<int> &picked, float nms_threshold);
 
     virtual int load(DET_PARAM_T *opt);
     virtual int detect(unsigned char *rgb, int width, int height, std::vector<DET_OBJ_T> &objects);

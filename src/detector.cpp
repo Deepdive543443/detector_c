@@ -25,6 +25,15 @@ static uint32_t s_color_list[] = {
     0x00ff00ff, 0x2a0000ff, 0x540000ff, 0x7f0000ff, 0xaa0000ff, 0xd40000ff, 0xff0000ff, 0x000000ff, 0x242424ff,
     0x484848ff, 0x6d6d6dff, 0x919191ff, 0xb6b6b6ff, 0xdadadaff, 0xbc7100ff, 0xbcb650ff, 0x007f7fff};
 
+static inline float intersection_area(const DET_OBJ_T &a, const DET_OBJ_T &b)
+{
+    float xA = std::max(a.x, b.x);
+    float yA = std::max(a.y, a.y);
+    float xB = std::min(a.x + a.w, b.x + b.w);
+    float yB = std::min(a.y + a.h, b.y + b.h);
+    return std::max(0.f, xB - xA) * std::max(0.f, yB - yA);
+}
+
 #define DRAW_TEXT_SIZE   8
 #define DRAW_TEXT_OFFSET 4
 #define DRAW_FLAG_H      22
@@ -51,27 +60,7 @@ int detncnn::draw_boxxes(unsigned char *rgb, int width, int height, std::vector<
     return 1;
 }
 
-Detector::Detector()
-{
-    blob_pool_allocator.set_size_compare_ratio(0.f);
-    workspace_pool_allocator.set_size_compare_ratio(0.f);
-}
-
-Detector::~Detector() { net.clear(); }
-
-int Detector::load(DET_PARAM_T *opt) { return 0; }
-int Detector::detect(unsigned char *rgb, int width, int height, std::vector<DET_OBJ_T> &objects) { return 0; }
-
-static inline float intersection_area(const DET_OBJ_T &a, const DET_OBJ_T &b)
-{
-    float xA  = std::max(a.x, b.x);
-    float yA  = std::max(a.y, a.y);
-    float xB  = std::min(a.x + a.w, b.x + b.w);
-    float yB  = std::min(a.y + a.h, b.y + b.h);
-    return std::max(0.f, xB - xA) * std::max(0.f, yB - yA);
-}
-
-void Detector::qsort_descent_inplace(std::vector<DET_OBJ_T> &objects, int left, int right)
+void detncnn::qsort_descent_inplace(std::vector<DET_OBJ_T> &objects, int left, int right)
 {
     int   i = left;
     int   j = right;
@@ -104,13 +93,13 @@ void Detector::qsort_descent_inplace(std::vector<DET_OBJ_T> &objects, int left, 
     }
 }
 
-void Detector::qsort_descent_inplace(std::vector<DET_OBJ_T> &objects)
+void detncnn::qsort_descent_inplace(std::vector<DET_OBJ_T> &objects)
 {
     if (objects.empty()) return;
     qsort_descent_inplace(objects, 0, objects.size() - 1);
 }
 
-void Detector::nms_sorted_bboxes(const std::vector<DET_OBJ_T> &objects, std::vector<int> &picked, float nms_threshold)
+void detncnn::nms_sorted_bboxes(const std::vector<DET_OBJ_T> &objects, std::vector<int> &picked, float nms_threshold)
 {
     picked.clear();
 
@@ -138,3 +127,14 @@ void Detector::nms_sorted_bboxes(const std::vector<DET_OBJ_T> &objects, std::vec
         if (keep) picked.push_back(i);
     }
 }
+
+Detector::Detector()
+{
+    blob_pool_allocator.set_size_compare_ratio(0.f);
+    workspace_pool_allocator.set_size_compare_ratio(0.f);
+}
+
+Detector::~Detector() { net.clear(); }
+
+int Detector::load(DET_PARAM_T *opt) { return 0; }
+int Detector::detect(unsigned char *rgb, int width, int height, std::vector<DET_OBJ_T> &objects) { return 0; }

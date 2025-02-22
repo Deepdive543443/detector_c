@@ -209,10 +209,10 @@ int NanoDetPlus::detect(unsigned char *rgb, int width, int height, std::vector<D
         generate_proposals(cls_pred, dis_pred, 64, in_pad, prob_threshold, obj64);
         proposals.insert(proposals.end(), obj64.begin(), obj64.end());
     }
-    qsort_descent_inplace(proposals);
+    detncnn::qsort_descent_inplace(proposals);
 
     std::vector<int> picked;
-    nms_sorted_bboxes(proposals, picked, nms_threshold);
+    detncnn::nms_sorted_bboxes(proposals, picked, nms_threshold);
 
     int count = picked.size();
     objects.resize(count);
