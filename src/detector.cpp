@@ -1,3 +1,4 @@
+#include <stdint.h>
 #include "detector.hpp"
 
 static const char *s_class_names[] = {
