@@ -2,22 +2,15 @@ set(project_title detncnn)
 project(${project_title})
 cmake_minimum_required(VERSION 3.14)
 
-add_subdirectory(lib/ncnn)
-
-file( GLOB TEST_SOURCES ${CMAKE_CURRENT_LIST_DIR}/res/*)
-foreach(TEST_SOURCE ${TEST_SOURCES})
-    get_filename_component(name ${TEST_SOURCE} NAME)
-    configure_file(${TEST_SOURCE} ${CMAKE_CURRENT_BINARY_DIR}/${name} COPYONLY)
-endforeach()
-
-include(${CMAKE_CURRENT_LIST_DIR}/test/AddTest.cmake)
-add_test_c(nanodet-plus-m_416_int8 DET_NANODETPLUS)
-add_test_c(FastestDet DET_FASTESTDET)
-add_test_c(rtmdet_tiny_8xb32-300e_coco DET_RTMDET)
-add_test_c(rtmdet_s_8xb32-300e_coco DET_RTMDET)
-add_test_c(rtmdet_m_8xb32-300e_coco DET_RTMDET)
+# Configure ncnn build options
+set(NCNN_BUILD_TOOLS OFF CACHE BOOL "Disable ncnn build tools" FORCE)
+set(NCNN_BUILD_EXAMPLES OFF CACHE BOOL "Disable ncnn examples" FORCE)
+set(NCNN_BUILD_TESTS OFF CACHE BOOL "Disable ncnn tests" FORCE)
 
 file( GLOB_RECURSE LIB_SOURCES ${CMAKE_CURRENT_LIST_DIR}/src/*)
 add_library( detncnn ${LIB_SOURCES})
 target_include_directories(detncnn PRIVATE src ${CMAKE_CURRENT_BINARY_DIR})
 target_link_libraries(detncnn ncnn)
+
+add_subdirectory(lib/ncnn)
+add_subdirectory(test)
