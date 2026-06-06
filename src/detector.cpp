@@ -1,5 +1,8 @@
 #include <stdint.h>
 #include "detector.hpp"
+#include "detector/nanodetplus.hpp"
+#include "detector/fastestdet.hpp"
+#include "detector/rtmdet.hpp"
 
 static const char *s_class_names[] = {
     "person",         "bicycle",    "car",           "motorcycle",    "airplane",     "bus",           "train",
@@ -35,6 +38,42 @@ static inline float intersection_area(const DET_OBJ_T &a, const DET_OBJ_T &b)
     return std::max(0.f, xB - xA) * std::max(0.f, yB - yA);
 }
 
+Detector::Detector()
+{
+    blob_pool_allocator.set_size_compare_ratio(0.f);
+    workspace_pool_allocator.set_size_compare_ratio(0.f);
+}
+
+Detector::~Detector() { net.clear(); }
+
+int Detector::load(DET_PARAM_T *opt) { return 0; }
+int Detector::detect(unsigned char *rgb, int width, int height, std::vector<DET_OBJ_T> &objects) { return 0; }
+
+namespace detncnn {
+
+Detector *init(DET_PARAM_T *opt)
+{
+    Detector *net;
+    switch (opt->model_type) {
+        case DET_NANODETPLUS:
+            net = (Detector *)new NanoDetPlus;
+            break;
+
+        case DET_FASTESTDET:
+            net = (Detector *)new FastestDet;
+            break;
+
+        case DET_RTMDET:
+            net = (Detector *)new RTMDet;
+            break;
+
+        default:
+            return NULL;
+    }
+    net->load(opt);
+    return net;
+}
+
 #define DRAW_TEXT_SIZE   8
 #define DRAW_TEXT_OFFSET 4
 #define DRAW_FLAG_H      22
@@ -43,7 +82,7 @@ static inline float intersection_area(const DET_OBJ_T &a, const DET_OBJ_T &b)
 #define DRAW_FLAG_W   DRAW_TEXT_SIZE * 1.1
 #define DRAW_FLAG_POS DRAW_FLAG_H + DRAW_FLAG_OFFSET
 #define DRAW_TEXT_POS DRAW_FLAG_H + DRAW_TEXT_OFFSET
-int detncnn::draw_boxxes(unsigned char *rgb, int width, int height, std::vector<DET_OBJ_T> &objects)
+int draw_boxxes(unsigned char *rgb, int width, int height, std::vector<DET_OBJ_T> &objects)
 {
     for (size_t i = 0; i < objects.size(); i++) {
         char text[32];
@@ -61,7 +100,7 @@ int detncnn::draw_boxxes(unsigned char *rgb, int width, int height, std::vector<
     return 1;
 }
 
-void detncnn::qsort_descent_inplace(std::vector<DET_OBJ_T> &objects, int left, int right)
+void qsort_descent_inplace(std::vector<DET_OBJ_T> &objects, int left, int right)
 {
     int   i = left;
     int   j = right;
@@ -94,13 +133,13 @@ void detncnn::qsort_descent_inplace(std::vector<DET_OBJ_T> &objects, int left, i
     }
 }
 
-void detncnn::qsort_descent_inplace(std::vector<DET_OBJ_T> &objects)
+void qsort_descent_inplace(std::vector<DET_OBJ_T> &objects)
 {
     if (objects.empty()) return;
     qsort_descent_inplace(objects, 0, objects.size() - 1);
 }
 
-void detncnn::nms_sorted_bboxes(const std::vector<DET_OBJ_T> &objects, std::vector<int> &picked, float nms_threshold)
+void nms_sorted_bboxes(const std::vector<DET_OBJ_T> &objects, std::vector<int> &picked, float nms_threshold)
 {
     picked.clear();
 
@@ -128,14 +167,4 @@ void detncnn::nms_sorted_bboxes(const std::vector<DET_OBJ_T> &objects, std::vect
         if (keep) picked.push_back(i);
     }
 }
-
-Detector::Detector()
-{
-    blob_pool_allocator.set_size_compare_ratio(0.f);
-    workspace_pool_allocator.set_size_compare_ratio(0.f);
-}
-
-Detector::~Detector() { net.clear(); }
-
-int Detector::load(DET_PARAM_T *opt) { return 0; }
-int Detector::detect(unsigned char *rgb, int width, int height, std::vector<DET_OBJ_T> &objects) { return 0; }
+}  // namespace detncnn

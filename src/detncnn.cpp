@@ -9,28 +9,7 @@
 extern "C" {
 #endif
 
-void *det_init(DET_PARAM_T *opt)
-{
-    Detector *net;
-    switch (opt->model_type) {
-        case DET_NANODETPLUS:
-            net = (Detector *)new NanoDetPlus;
-            break;
-
-        case DET_FASTESTDET:
-            net = (Detector *)new FastestDet;
-            break;
-
-        case DET_RTMDET:
-            net = (Detector *)new RTMDet;
-            break;
-
-        default:
-            return NULL;
-    }
-    net->load(opt);
-    return (void *)net;
-}
+void *det_init(DET_PARAM_T *opt) { return (void *)detncnn::init(opt); }
 
 int det_exit(void *ctx)
 {
@@ -44,7 +23,7 @@ int det_exit(void *ctx)
 int det_detect(void *ctx, unsigned char *rgb, int h, int w, DET_OBJ_T *output, int *out_len)
 {
     std::vector<DET_OBJ_T> objects;
-    Detector *det = (Detector *)ctx;
+    Detector              *det = (Detector *)ctx;
 
     if (det->detect(rgb, w, h, objects)) {
         *out_len = objects.size() <= DET_OBJ_BUFSIZE ? objects.size() : DET_OBJ_BUFSIZE;
